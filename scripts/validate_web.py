@@ -3,6 +3,7 @@
 from html.parser import HTMLParser
 from pathlib import Path
 import json
+import re
 import subprocess
 import sys
 import tempfile
@@ -83,15 +84,30 @@ if manifest_file.exists():
 else:
     errors.append("Falta manifest.webmanifest")
 
+# The service worker's precache list must not contain missing files.
+sw_file = ROOT / "sw.js"
+javascript_sources = [(f"JavaScript inline #{i}", source) for i, source in enumerate(inline_scripts, start=1)]
+if not sw_file.is_file():
+    errors.append("Falta sw.js")
+else:
+    sw_source = sw_file.read_text(encoding="utf-8")
+    javascript_sources.append(("sw.js", sw_source))
+    shell_match = re.search(r"const\s+SHELL\s*=\s*\[(.*?)\]\s*;", sw_source, re.S)
+    if not shell_match:
+        errors.append("No se pudo localizar la lista SHELL de sw.js")
+    else:
+        for asset in re.findall(r"'([^']+)'", shell_match.group(1)):
+            check_local_reference(asset, "sw.js SHELL")
+
 node = subprocess.run(["node", "--version"], capture_output=True, text=True)
 if node.returncode != 0:
     errors.append("Node.js es necesario para comprobar la sintaxis de JavaScript.")
 else:
     with tempfile.TemporaryDirectory(prefix="nexo-check-") as temp_dir:
-        for index, source in enumerate(inline_scripts, start=1):
+        for index, (label, source) in enumerate(javascript_sources, start=1):
             if not source.strip():
                 continue
-            js_file = Path(temp_dir) / f"inline-{index}.js"
+            js_file = Path(temp_dir) / f"script-{index}.js"
             js_file.write_text(source, encoding="utf-8")
             result = subprocess.run(
                 ["node", "--check", str(js_file)],
@@ -100,7 +116,7 @@ else:
             )
             if result.returncode != 0:
                 detail = (result.stderr or result.stdout).strip()
-                errors.append(f"JavaScript inline #{index}: {detail}")
+                errors.append(f"{label}: {detail}")
 
 if errors:
     print("NEXO: VALIDACIÓN FALLIDA")
@@ -113,4 +129,5 @@ print(f"- index.html leído")
 print(f"- {len(inline_scripts)} bloques inline de JavaScript comprobados")
 print("- referencias locales del HTML verificadas")
 print("- manifest.webmanifest validado")
-print("- sintaxis JavaScript comprobada con Node.js")
+print("- sintaxis JavaScript inline y del service worker comprobada con Node.js")
+print("- recursos precargados por el service worker verificados")
