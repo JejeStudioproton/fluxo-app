@@ -623,7 +623,9 @@ function autoPlanWeek(){
   for(const task of candidates){
     const duration=clamp(Number(task.duration||30),5,480);
     const deadline=task.due||horizon;
-    const validDays=days.filter(d=>d.date<=horizon && (deadline<today ? d.date===today : d.date<=deadline));
+    // Intenta dejar al menos un día de margen antes de la fecha límite cuando sea posible.
+    const targetDate=task.due&&deadline>today?addDays(deadline,-1):deadline;
+    const validDays=days.filter(d=>d.date<=horizon && (deadline<today ? d.date===today : d.date<=targetDate));
     if(!validDays.length)continue;
     // Prefer a day with enough room; deadlines bias the task toward earlier slots.
     const fitting=validDays.filter(d=>d.capacity-d.used>=duration);
