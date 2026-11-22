@@ -789,7 +789,40 @@ async function runNexoAI(mode){
       const raw=await callNexoAI(instructions,prompt);
       let plan;try{const clean=raw.replace(/^`{3}(?:json)?\s*/i,"").replace(/\s*`{3}$/,"");plan=JSON.parse(clean);}catch(e){window._nexoPendingAIPlan=null;showNexoAIOutput("Grok no devolvió un plan válido en formato estructurado. Puedes volver a intentarlo.\n\nRespuesta recibida:\n"+raw);return;}
       const validIds=new Set(context.pendingTasks.map(t=>t.id));
-      plan.assignments=Array.isArray(plan.assignments)?plan.assignments.filter(a=>{const t=DB.tasks.find(x=>String(x.id)===String(a.id)&&!x.done);return !!t&&validIds.has(String(a.id))&&/^\d{4}-\d{2}-\d{2}$/.test(String(a.date))&&a.date>=todayStr()&&a.date<=addDays(todayStr(),7)&&(!t.due||a.date<=t.due);}).slice(0,25):[];
+      const validDate=value=>{
+        if(!/^\d{4}-\d{2}-\d{2}$/.test(String(value||"")))return false;
+        const parsed=new Date(String(value)+"T12:00:00");
+        return !Number.isNaN(parsed.getTime())&&parsed.toISOString().slice(0,10)===String(value);
+      };
+      const seenTaskIds=new Set();
+      const dailyMinutes=new Map();
+      const maxDailyMinutes=Math.max(30,Math.min(720,Math.round(context.timeAvailableHours*60)||240));
+      const proposed=Array.isArray(plan.assignments)?plan.assignments.slice(0,100):[];
+      const accepted=[];
+      let rejectedInvalid=0,rejectedCapacity=0;
+      for(const a of proposed){
+        const id=String(a?.id||"");
+        const date=String(a?.date||"");
+        const task=DB.tasks.find(t=>String(t.id)===id&&!t.done);
+        if(!task||!validIds.has(id)||seenTaskIds.has(id)||!validDate(date)||date<todayStr()||date>addDays(todayStr(),7)|| (task.due&&date>task.due)){
+          rejectedInvalid++;
+          continue;
+        }
+        const duration=Math.max(5,Math.min(720,Number(task.duration)||30));
+        const used=dailyMinutes.get(date)||0;
+        if(used+duration>maxDailyMinutes){
+          rejectedCapacity++;
+          continue;
+        }
+        seenTaskIds.add(id);
+        dailyMinutes.set(date,used+duration);
+        accepted.push({...a,id,date});
+        if(accepted.length>=25)break;
+      }
+      plan.assignments=accepted;
+      if(!Array.isArray(plan.warnings))plan.warnings=[];
+      if(rejectedInvalid)plan.warnings.push("Se descartaron "+rejectedInvalid+" asignaciones inválidas, duplicadas o incompatibles con las fechas límite.");
+      if(rejectedCapacity)plan.warnings.push("Se descartaron "+rejectedCapacity+" asignaciones para no superar el tiempo disponible estimado de "+Math.round(maxDailyMinutes/60*10)/10+" h por día.");
       window._nexoPendingAIPlan=plan;
       const lines=[String(plan.summary||"Propuesta preparada."),"",...plan.assignments.map(a=>{const t=DB.tasks.find(x=>String(x.id)===String(a.id));return "• "+(t?.title||a.id)+" → "+fmtDate(a.date)+(a.reason?" — "+a.reason:"");})];
       if(Array.isArray(plan.warnings)&&plan.warnings.length)lines.push("","Avisos:",...plan.warnings.map(w=>"• "+String(w)));
