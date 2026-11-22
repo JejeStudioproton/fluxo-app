@@ -861,3 +861,27 @@ body.sidebar-collapsed .mobile-brand { display: flex; }
   .view.active { display: block !important; }
   .card, .task, .note { box-shadow: none; break-inside: avoid; }
 }
+
+
+/* FLUXO UI polish — accessible focus and clearer dashboard hierarchy */
+:where(button, a, input, select, textarea, [tabindex]):focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--accent) 72%, white);
+  outline-offset: 3px;
+}
+.overview-head { align-items: end; margin-bottom: 13px; }
+.overview-head h2 { letter-spacing: -.035em; }
+.overview-head p { margin-top: 4px; line-height: 1.5; }
+.overview-card {
+  transition: transform .16s ease, border-color .16s ease, box-shadow .16s ease;
+}
+.overview-card:hover {
+  transform: translateY(-2px);
+  border-color: color-mix(in srgb, var(--accent) 30%, var(--line));
+  box-shadow: 0 10px 24px rgba(24, 59, 37, .07);
+}
+.dashboard-header h1 { letter-spacing: -.045em; }
+.dashboard-sub { max-width: 52ch; line-height: 1.55; }
+@media (prefers-reduced-motion: reduce) {
+  .overview-card { transition: none; }
+  .overview-card:hover { transform: none; }
+}
