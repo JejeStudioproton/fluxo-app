@@ -610,10 +610,10 @@ function autoPlanWeek(){
     const baseMinutes=(date===today?Number(getTodayCheckin().timeAvailable||4)*60:240);
     // Reserva un margen para imprevistos y resta los compromisos registrados.
     const capacity=Math.max(0,Math.floor(baseMinutes*0.8-eventMinutes));
-    const used=DB.tasks.filter(t=>!t.done && t.scheduled===date).reduce((sum,t)=>sum+Number(t.duration||30),0);
+    const used=DB.tasks.filter(t=>!t.done && !t.autoScheduled && t.scheduled===date).reduce((sum,t)=>sum+Number(t.duration||30),0);
     return {date,capacity,used,events};
   });
-  const candidates=DB.tasks.filter(t=>!t.done && (!t.scheduled || t.scheduled<today))
+  const candidates=DB.tasks.filter(t=>!t.done && (!t.scheduled || t.scheduled<today || t.autoScheduled===true))
     .sort((a,b)=>{
       const da=a.due||"9999", db=b.due||"9999";
       if(da!==db)return da.localeCompare(db);
@@ -645,6 +645,7 @@ function autoPlanWeek(){
       overflow++;
     }
     task.scheduled=chosen.date;
+    task.autoScheduled=true;
     chosen.used+=duration;
     assigned++;
   }
@@ -1248,7 +1249,7 @@ $("#saveTaskBtn").addEventListener("click", ()=>{
   const validDate=value=>{if(!value)return true;if(!/^\d{4}-\d{2}-\d{2}$/.test(value))return false;const d=new Date(value+"T12:00:00");return !Number.isNaN(d.getTime())&&d.getFullYear()===Number(value.slice(0,4))&&d.getMonth()+1===Number(value.slice(5,7))&&d.getDate()===Number(value.slice(8,10));};
   if(!validDate(scheduled)||!validDate(due)||!validDate(repeatEnd)){toast("Revisa las fechas de la tarea");return;}
   if(repeatEnd && repeat!=="none" && (scheduled||due) && repeatEnd<(scheduled||due)){toast("La fecha final de repetición debe ser posterior al inicio");return;}
-  const data={title, category:$("#taskCategory").value, project, scheduled, due, repeat, repeatEnd:repeat==="none"?"":repeatEnd, priority:segValue("taskPrioritySeg"), energy:segValue("taskEnergySeg"), duration, notes:$("#taskNotes").value.trim()};
+  const data={title, category:$("#taskCategory").value, project, scheduled, due, repeat, repeatEnd:repeat==="none"?"":repeatEnd, priority:segValue("taskPrioritySeg"), energy:segValue("taskEnergySeg"), duration, notes:$("#taskNotes").value.trim(), autoScheduled:false};
   if(data.repeat!=="none"&&!data.scheduled&&!data.due)data.scheduled=todayStr();
   const existing=(DB.tasks.find(x=>x.id===id)?.subtasks || []).slice();
   data.subtasks=$("#taskSubtasks").value.split("\n").map(x=>x.trim()).filter(Boolean).map(title=>{ const idx=existing.findIndex(x=>x.title===title); return idx<0?{id:uid(),title,done:false}:existing.splice(idx,1)[0]; });
