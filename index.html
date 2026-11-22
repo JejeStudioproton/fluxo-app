@@ -1509,7 +1509,7 @@ updateNavigationState();
 /* Init */
 loadDB();
 renderAll();
-if ("serviceWorker" in navigator && location.protocol.startsWith("http")) navigator.serviceWorker.register("./sw.js").catch(err=>console.warn("Modo sin conexión no disponible:",err));
+if ("serviceWorker" in navigator && location.protocol.startsWith("http")) navigator.serviceWorker.register("./sw.js",{updateViaCache:"none"}).then(reg=>reg.update()).catch(err=>console.warn("Modo sin conexión no disponible:",err));
 if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(()=>{});
 </script>
 </body>
