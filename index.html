@@ -53,7 +53,7 @@
         <div class="section-title habit-title"><div><span class="eyebrow"></span><h2>Tus hábitos</h2></div><button class="text-link" data-goto="habitos">Gestionar <span>→</span></button></div>
         <div id="todayHabits"></div>
         <div class="section-title"><div><span class="eyebrow"></span><h2>Plan del día</h2></div><button class="text-link" id="regenPlanBtn">Actualizar <span>↻</span></button></div>
-        <div class="card plan-card"><div class="plan-intro"><div><h3>Una propuesta para tu día</h3><p class="small">Prioriza tus tareas y busca huecos alrededor de tus compromisos con hora. No cambia tus fechas automáticamente.</p></div><button class="btn small" id="goFocusBtn">Iniciar enfoque →</button></div><div id="aiPlan"></div></div>
+        <div class="card plan-card"><div class="plan-intro"><div><h3>Una propuesta para tu día</h3><p class="small">Distribuye las tareas por la semana según duración, prioridad, fechas límite y compromisos. Las fechas límite nunca se modifican.</p></div><div style="display:flex;gap:8px;flex-wrap:wrap;"><button class="btn small" id="autoPlanWeekBtn">Organizar mi semana</button><button class="btn small" id="goFocusBtn">Iniciar enfoque →</button></div></div><div id="aiPlan"></div></div>
       </div>
       <aside class="dashboard-aside">
         <div class="card checkin-card"><h2>¿Cómo estás hoy?</h2><p class="small">Elige cómo te sientes y cuánto tiempo tienes.</p>
@@ -599,6 +599,59 @@ function parseNatural(text){
   else if(/leer|meditar|ordenar|llamar|email|correo/i.test(low)) energy="baja";
   title=(title||raw).replace(/\s+/g," ").trim();title=title.charAt(0).toUpperCase()+title.slice(1);
   return {title,priority,energy,duration,due,scheduled,repeat,category};
+}
+function autoPlanWeek(){
+  const today=todayStr(), horizon=addDays(today,6);
+  const days=Array.from({length:7},(_,i)=>addDays(today,i)).map(date=>{
+    const events=DB.events.filter(e=>e.date===date);
+    const eventMinutes=events.reduce((sum,e)=>sum+(Number(e.duration)||60),0);
+    const baseMinutes=(date===today?Number(getTodayCheckin().timeAvailable||4)*60:240);
+    // Reserva un margen para imprevistos y resta los compromisos registrados.
+    const capacity=Math.max(0,Math.floor(baseMinutes*0.8-eventMinutes));
+    const used=DB.tasks.filter(t=>!t.done && t.scheduled===date).reduce((sum,t)=>sum+Number(t.duration||30),0);
+    return {date,capacity,used,events};
+  });
+  const candidates=DB.tasks.filter(t=>!t.done && (!t.scheduled || t.scheduled<today))
+    .sort((a,b)=>{
+      const da=a.due||"9999", db=b.due||"9999";
+      if(da!==db)return da.localeCompare(db);
+      const weight={alta:3,media:2,baja:1};
+      if(weight[b.priority]!==weight[a.priority])return weight[b.priority]-weight[a.priority];
+      return (a.createdAt||0)-(b.createdAt||0);
+    });
+  let assigned=0, overflow=0;
+  for(const task of candidates){
+    const duration=clamp(Number(task.duration||30),5,480);
+    const deadline=task.due||horizon;
+    const validDays=days.filter(d=>d.date<=horizon && (deadline<today ? d.date===today : d.date<=deadline));
+    if(!validDays.length)continue;
+    // Prefer a day with enough room; deadlines bias the task toward earlier slots.
+    const fitting=validDays.filter(d=>d.capacity-d.used>=duration);
+    let chosen;
+    if(fitting.length){
+      chosen=fitting.sort((a,b)=>{
+        const loadA=a.capacity? a.used/a.capacity:1, loadB=b.capacity?b.used/b.capacity:1;
+        const slackA=deadline==="9999"?7:Math.max(0,Math.round((new Date(deadline+"T12:00:00")-new Date(a.date+"T12:00:00"))/86400000));
+        const slackB=deadline==="9999"?7:Math.max(0,Math.round((new Date(deadline+"T12:00:00")-new Date(b.date+"T12:00:00"))/86400000));
+        return (loadA-loadB) || (slackA-slackB) || a.date.localeCompare(b.date);
+      })[0];
+    }else{
+      // If the week is overloaded, still place it visibly instead of pretending it fits.
+      chosen=validDays.slice().sort((a,b)=>(a.used/Math.max(1,a.capacity))-(b.used/Math.max(1,b.capacity)))[0];
+      overflow++;
+    }
+    task.scheduled=chosen.date;
+    chosen.used+=duration;
+    assigned++;
+  }
+  saveDB();
+  renderAll();
+  const unscheduled=DB.tasks.filter(t=>!t.done && (!t.scheduled || t.scheduled<today)).length;
+  const msg=assigned===0
+    ? "La semana ya está organizada o no hay tareas nuevas que distribuir."
+    : "Semana organizada: "+assigned+" tarea"+(assigned===1?"":"s")+" asignada"+(assigned===1?"":"s")+" a días concretos."+ (overflow?" "+overflow+" excede la capacidad estimada; revisa la carga.":"") + (unscheduled?" "+unscheduled+" no se pudieron asignar.":"");
+  toast(msg);
+  return {assigned,overflow,unscheduled};
 }
 function generatePlan(day=todayStr()){
   const pending=sortedTasks(DB.tasks.filter(t=>taskAvailableOnDay(t,day)));
@@ -1166,6 +1219,7 @@ $("#saveEnergyBtn").addEventListener("click", ()=>{
   saveDB(); renderAll(); toast(" Energía guardada. Plan actualizado ");
 });
 $("#regenPlanBtn").addEventListener("click", ()=>{ renderHoy(); toast(" Plan regenerado"); });
+$("#autoPlanWeekBtn").addEventListener("click", ()=>autoPlanWeek());
 $("#goFocusBtn").addEventListener("click", ()=>switchView("enfoque"));
 $("#quickAddBtn").addEventListener("click", ()=>{
   const v=$("#quickInput").value.trim(); if(!v){ toast("Escribe algo primero "); return; }
