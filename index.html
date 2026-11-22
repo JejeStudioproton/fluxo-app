@@ -796,8 +796,18 @@ async function runNexoAI(mode){
       };
       const seenTaskIds=new Set();
       const dailyMinutes=new Map();
-      const maxDailyMinutes=Math.max(30,Math.min(720,Math.round(context.timeAvailableHours*60)||240));
       const proposed=Array.isArray(plan.assignments)?plan.assignments.slice(0,100):[];
+      const proposedIds=new Set(proposed.map(a=>String(a?.id||"")));
+      const dailyCapacity=date=>{
+        const baseMinutes=date===todayStr()
+          ? Math.max(30,Math.min(720,Math.round(context.timeAvailableHours*60)||240))
+          : 240;
+        const eventMinutes=context.events.filter(e=>e.date===date)
+          .reduce((sum,e)=>sum+Math.max(0,Math.min(720,Number(e.duration)||60)),0);
+        const fixedTaskMinutes=DB.tasks.filter(t=>!t.done&&t.scheduled===date&&!proposedIds.has(String(t.id)))
+          .reduce((sum,t)=>sum+Math.max(5,Math.min(720,Number(t.duration)||30)),0);
+        return Math.max(0,baseMinutes-eventMinutes-fixedTaskMinutes);
+      };
       const accepted=[];
       let rejectedInvalid=0,rejectedCapacity=0;
       for(const a of proposed){
@@ -810,7 +820,7 @@ async function runNexoAI(mode){
         }
         const duration=Math.max(5,Math.min(720,Number(task.duration)||30));
         const used=dailyMinutes.get(date)||0;
-        if(used+duration>maxDailyMinutes){
+        if(used+duration>dailyCapacity(date)){
           rejectedCapacity++;
           continue;
         }
@@ -822,7 +832,7 @@ async function runNexoAI(mode){
       plan.assignments=accepted;
       if(!Array.isArray(plan.warnings))plan.warnings=[];
       if(rejectedInvalid)plan.warnings.push("Se descartaron "+rejectedInvalid+" asignaciones inválidas, duplicadas o incompatibles con las fechas límite.");
-      if(rejectedCapacity)plan.warnings.push("Se descartaron "+rejectedCapacity+" asignaciones para no superar el tiempo disponible estimado de "+Math.round(maxDailyMinutes/60*10)/10+" h por día.");
+      if(rejectedCapacity)plan.warnings.push("Se descartaron "+rejectedCapacity+" asignaciones porque superaban la capacidad diaria estimada después de descontar eventos y tareas ya fijadas.");
       window._nexoPendingAIPlan=plan;
       const lines=[String(plan.summary||"Propuesta preparada."),"",...plan.assignments.map(a=>{const t=DB.tasks.find(x=>String(x.id)===String(a.id));return "• "+(t?.title||a.id)+" → "+fmtDate(a.date)+(a.reason?" — "+a.reason:"");})];
       if(Array.isArray(plan.warnings)&&plan.warnings.length)lines.push("","Avisos:",...plan.warnings.map(w=>"• "+String(w)));
