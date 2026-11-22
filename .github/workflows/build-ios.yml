@@ -1,0 +1,71 @@
+name: Build NEXO for iPadOS
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "ios/**"
+      - "index.html"
+      - "styles.css"
+      - "icon*"
+      - "manifest.webmanifest"
+      - ".github/workflows/build-ios.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  build-ios:
+    runs-on: macos-14
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Bundle the current NEXO interface
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p ios/NEXO/WebAssets
+          for file in index.html styles.css manifest.webmanifest sw.js icon.svg icon-180.png icon-192.png icon-512.png; do
+            if [ -f "$file" ]; then cp "$file" ios/NEXO/WebAssets/; fi
+          done
+          test -s ios/NEXO/WebAssets/index.html
+          test -s ios/NEXO/WebAssets/styles.css
+
+      - name: Validate Xcode project
+        run: xcodebuild -list -project ios/NEXO/NEXO.xcodeproj
+
+      - name: Build unsigned iPadOS app
+        run: |
+          xcodebuild \
+            -project ios/NEXO/NEXO.xcodeproj \
+            -scheme NEXO \
+            -configuration Release \
+            -sdk iphoneos \
+            -destination 'generic/platform=iOS' \
+            -derivedDataPath build/DerivedData \
+            CODE_SIGNING_ALLOWED=NO \
+            build
+
+      - name: Package unsigned app artifact
+        shell: bash
+        run: |
+          set -euo pipefail
+          APP_PATH="build/DerivedData/Build/Products/Release-iphoneos/NEXO.app"
+          test -d "$APP_PATH"
+          mkdir -p build/artifacts
+          ditto -c -k --sequesterRsrc --keepParent "$APP_PATH" build/artifacts/NEXO-unsigned.app.zip
+          cat > build/artifacts/INSTALLATION-NOTE.txt <<'EOF'
+          This is an unsigned iPadOS app build. iPadOS will not install it directly.
+          Install on a physical iPad only after signing with a valid Apple development
+          certificate and provisioning profile. Never commit signing certificates,
+          private keys, or provisioning profiles to this public repository.
+          EOF
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: NEXO-unsigned-iPadOS
+          path: build/artifacts/
+          if-no-files-found: error
+          retention-days: 14
