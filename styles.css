@@ -885,3 +885,84 @@ body.sidebar-collapsed .mobile-brand { display: flex; }
   .overview-card { transition: none; }
   .overview-card:hover { transform: none; }
 }
+
+
+/* FLUXO refinement pass: consistent surfaces, controls, hierarchy and touch UX */
+:root {
+  --shadow-card: 0 1px 2px rgba(29,43,34,.025), 0 8px 26px -20px rgba(29,43,34,.25);
+}
+body { text-rendering: optimizeLegibility; -webkit-font-smoothing: antialiased; }
+button, a { -webkit-user-select: none; user-select: none; }
+button:focus-visible, a:focus-visible, [role="button"]:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 3px;
+}
+button:not(:disabled) { transition: background-color .16s ease, border-color .16s ease, color .16s ease, box-shadow .16s ease, transform .16s ease; }
+.btn { min-height: 44px; border: 1px solid var(--line); border-radius: 11px; font-weight: 620; }
+.btn.primary { border-color: var(--accent); box-shadow: 0 2px 5px rgba(25,70,42,.10); }
+.btn.primary:hover { box-shadow: 0 5px 13px rgba(25,70,42,.15); }
+.btn:active, .icon-btn:active, .nav-btn:active { transform: scale(.98); }
+.card, .overview-card, .capture-card, .task, .habit, .project-card, .note, .transaction {
+  box-shadow: var(--shadow-card);
+}
+.card { border-color: var(--line); }
+.card h2, .card h3 { text-wrap: pretty; }
+.eyebrow { letter-spacing: .11em; font-weight: 750; }
+.section-title { gap: 12px; }
+.section-title > div { min-width: 0; }
+.section-title h2 { text-wrap: balance; }
+.overview-grid { align-items: stretch; }
+.overview-card { border: 1px solid var(--line); text-align: left; }
+.overview-card:focus-visible { outline-offset: 2px; }
+.overview-detail { line-height: 1.4; }
+.capture-card { border-color: color-mix(in srgb, var(--accent) 18%, var(--line)); }
+.capture-input input { border-color: transparent; background: transparent; box-shadow: none; }
+.capture-input input:focus { border-color: var(--accent); background: var(--surface); }
+.task, .habit, .project-card, .transaction, .note { border-color: var(--line); }
+.task:hover, .habit:hover, .project-card:hover, .transaction:hover {
+  border-color: color-mix(in srgb, var(--accent) 28%, var(--line));
+}
+.task .t-title, .agenda-body b, .transaction-info b { line-height: 1.45; }
+.small, .task .t-meta, .agenda-body p { overflow-wrap: anywhere; }
+.filters .filter { min-height: 40px; white-space: nowrap; }
+.icon-btn, .mini-btn, .cal-nav, .cal-today { touch-action: manipulation; }
+.icon-btn:focus-visible, .mini-btn:focus-visible, .cal-nav:focus-visible, .cal-today:focus-visible { outline-offset: 2px; }
+input:focus-visible, select:focus-visible, textarea:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+input[type="checkbox"], input[type="radio"] { cursor: pointer; }
+.empty { border: 1px dashed var(--line); border-radius: 14px; background: var(--surface-soft); }
+.modal-overlay { padding: 16px; }
+.modal { border: 1px solid var(--line); }
+.modal-head { position: sticky; top: -21px; z-index: 2; padding: 5px 0 10px; background: var(--surface); }
+#toast { width: max-content; max-width: min(92vw, 520px); }
+nav#bottomNav .nav-btn { border-radius: 12px; }
+nav#bottomNav .nav-btn.active { font-weight: 700; }
+#installBanner { border-color: var(--line); }
+@media (hover: hover) and (pointer: fine) {
+  .overview-card:hover { transform: translateY(-2px); }
+  .nav-btn:hover, .filter:hover, .mode-btn:hover { border-color: color-mix(in srgb, var(--accent) 32%, var(--line)); }
+}
+@media (max-width: 850px) {
+  body { padding-bottom: calc(18px + env(safe-area-inset-bottom)); }
+  .dashboard-header { gap: 14px; }
+  .overview-card { min-width: 0; }
+  .dashboard-aside { gap: 12px; }
+  .card { border-radius: 16px; }
+  .task, .habit { border-radius: 13px; }
+  .modal-overlay { padding: 0; }
+}
+@media (max-width: 620px) {
+  .wrap { padding-right: max(15px, env(safe-area-inset-left)); padding-left: max(15px, env(safe-area-inset-right)); }
+  .dashboard-header h1 { max-width: 14ch; }
+  .overview-card { box-shadow: none; }
+  .capture-card { border-radius: 15px; }
+  .btn, .filter, .energy-btn, .mood-btn, .mode-btn { -webkit-tap-highlight-color: transparent; }
+  .modal { max-height: 88dvh; overscroll-behavior: contain; }
+  .modal-head { top: -18px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; transition-duration: .01ms !important; }
+  .overview-card:hover, .btn:active, .icon-btn:active, .nav-btn:active { transform: none; }
+}
