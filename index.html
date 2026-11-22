@@ -787,9 +787,9 @@ async function runNexoAI(mode){
     if(mode==="plan"){
       const prompt="Crea una propuesta semanal con las tareas y compromisos actuales. Devuelve SOLO JSON válido, sin markdown, con este esquema: {"summary":"resumen breve","assignments":[{"id":"id exacto de una tarea pendiente","date":"YYYY-MM-DD","reason":"motivo breve"}],"warnings":["advertencias si las hay"]}. Asigna solo IDs existentes en pendingTasks, máximo 25 tareas, fechas entre hoy y los próximos 7 días. No programes tareas en días con eventos incompatibles. No cambies fechas límite. Si faltan datos, explica las dudas en warnings. Contexto: "+JSON.stringify(context);
       const raw=await callNexoAI(instructions,prompt);
-      let plan;try{const clean=raw.replace(/^`{3}(?:json)?s*/i,"").replace(/s*`{3}$/,"");plan=JSON.parse(clean);}catch(e){window._nexoPendingAIPlan=null;showNexoAIOutput("Grok no devolvió un plan válido en formato estructurado. Puedes volver a intentarlo.\n\nRespuesta recibida:\n"+raw);return;}
+      let plan;try{const clean=raw.replace(/^`{3}(?:json)?\s*/i,"").replace(/\s*`{3}$/,"");plan=JSON.parse(clean);}catch(e){window._nexoPendingAIPlan=null;showNexoAIOutput("Grok no devolvió un plan válido en formato estructurado. Puedes volver a intentarlo.\n\nRespuesta recibida:\n"+raw);return;}
       const validIds=new Set(context.pendingTasks.map(t=>t.id));
-      plan.assignments=Array.isArray(plan.assignments)?plan.assignments.filter(a=>validIds.has(String(a.id))&&/^\d{4}-\d{2}-\d{2}$/.test(String(a.date))&&a.date>=todayStr()&&a.date<=addDays(todayStr(),7)).slice(0,25):[];
+      plan.assignments=Array.isArray(plan.assignments)?plan.assignments.filter(a=>{const t=DB.tasks.find(x=>String(x.id)===String(a.id)&&!x.done);return !!t&&validIds.has(String(a.id))&&/^\d{4}-\d{2}-\d{2}$/.test(String(a.date))&&a.date>=todayStr()&&a.date<=addDays(todayStr(),7)&&(!t.due||a.date<=t.due);}).slice(0,25):[];
       window._nexoPendingAIPlan=plan;
       const lines=[String(plan.summary||"Propuesta preparada."),"",...plan.assignments.map(a=>{const t=DB.tasks.find(x=>String(x.id)===String(a.id));return "• "+(t?.title||a.id)+" → "+fmtDate(a.date)+(a.reason?" — "+a.reason:"");})];
       if(Array.isArray(plan.warnings)&&plan.warnings.length)lines.push("","Avisos:",...plan.warnings.map(w=>"• "+String(w)));
