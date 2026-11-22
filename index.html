@@ -531,9 +531,11 @@ function nextRepeatDate(date,repeat){
 }
 function taskAvailableOnDay(task,day=todayStr()){
   if(task.done)return false;
-  if(task.due && task.due<=day)return true;
+  // La fecha de planificación controla cuándo se trabaja en la tarea;
+  // la fecha límite sirve para priorizarla, no para ignorar una planificación futura.
   if(task.scheduled)return task.scheduled<=day;
-  return !task.due || task.due<=day;
+  if(task.due)return task.due<=day;
+  return true;
 }
 function plannedDate(task){return task.scheduled||task.due||"";}
 function sortedTasks(list){
