@@ -1,0 +1,1457 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>FLUXO — Tu espacio para organizarte</title>
+<meta name="description" content="FLUXO: tareas, proyectos, calendario, hábitos, enfoque, metas, notas y finanzas personales con datos locales.">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="FLUXO">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#34744f">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/svg+xml" href="icon.svg">
+<link rel="apple-touch-icon" sizes="180x180" href="icon-180.png">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div id="installBanner" role="region" aria-label="Instalar app">
+  <div class="banner-inner">
+    
+    <div>
+      <b>Instala FLUXO en tu iPad como una app</b>
+      <p>Abre la dirección HTTPS en Safari y toca <b>Compartir → Añadir a pantalla de inicio</b>. Si aparece, activa <b>Abrir como app web</b>. Después inicia FLUXO desde el icono de inicio —no desde el ZIP— para abrirla sin la barra de Safari. Ábrela con internet una vez para preparar el modo sin conexión.</p>
+    </div>
+    <button id="dismissInstall">Entendido</button>
+  </div>
+</div>
+
+<header><div class="wrap header-row"><div class="header-leading"><button class="icon-btn menu-toggle" id="menuToggle" aria-controls="bottomNav" aria-expanded="false" aria-label="Abrir menú de navegación"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button><div class="mobile-brand"><span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="2.7" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 8H10c4 0 6 2 9 5l6 5M2.5 18H25M2.5 28H10c4 0 6-2 9-5l6-5M22 12l6 6-6 6"/></svg></span><b>fluxo</b></div><div class="header-location"><span class="location-dot"></span> TU ESPACIO <span class="location-divider">/</span> <b id="currentLocation">Hoy</b></div></div><div class="pills"><span class="pill soft" id="pillDate">—</span><span class="pill" id="pillStreak">0</span><span class="pill accent" id="pillXP">0 XP</span><button class="icon-btn" id="themeBtn" aria-label="Cambiar tema"></button><button class="icon-btn header-settings" id="settingsButton" data-goto="ajustes" data-view="ajustes" aria-label="Abrir ajustes" title="Ajustes"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19 13.5v-3l-1.7-.5-.6-1.5.9-1.5-2.1-2.1-1.5.9-1.5-.6L12 3H9l-.5 1.7-1.5.6-1.5-.9-2.1 2.1.9 1.5-.6 1.5L2 10v3l1.7.5.6 1.5-.9 1.5 2.1 2.1 1.5-.9 1.5.6L9 20h3l.5-1.7 1.5-.6 1.5.9 2.1-2.1-.9-1.5.6-1.5Z" transform="translate(1 0.5)"/></svg></button></div></div></header>
+
+<main class="wrap">
+
+  <!-- HOY -->
+  <section class="view active" id="view-hoy">
+    <div class="dashboard-header">
+      <div><p class="eyebrow" id="todayLabel">HOY</p><h1 id="greeting">Buenos días</h1><p class="dashboard-sub" id="todaySummary">Organiza lo que importa, a tu manera.</p></div>
+      <button class="btn primary dashboard-new" id="dashboardNewTask"> <span>＋</span> Nueva tarea</button>
+    </div>
+    <div class="overview-head"><div><h2>Resumen</h2><p>Todo lo importante, de un vistazo.</p></div></div>
+    <div class="overview-grid">
+      <button class="overview-card" data-goto="tareas"><div class="overview-top"><span class="overview-icon icon-blue"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="m8 11 2 2 4-4M8 17h8"/></svg></span><span class="overview-arrow">↗</span></div><b id="overviewPending">0</b><span class="overview-title">Pendientes</span><span class="overview-detail">En tu lista</span></button>
+      <button class="overview-card" data-goto="habitos"><div class="overview-top"><span class="overview-icon icon-mint"><svg viewBox="0 0 24 24"><path d="M12 20v-8m0 4c-4 0-7-3-7-7 4 0 7 3 7 7Zm0-4c0-4 3-7 7-7 0 4-3 7-7 7Z"/></svg></span><span class="overview-arrow">↗</span></div><b id="overviewHabits">0/0</b><span class="overview-title">Hábitos de hoy</span><span class="overview-detail">Completados</span></button>
+      <button class="overview-card" data-goto="enfoque"><div class="overview-top"><span class="overview-icon icon-amber"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 7v5l3 2"/></svg></span><span class="overview-arrow">↗</span></div><b><span id="overviewFocus">0</span><small> min</small></b><span class="overview-title">Enfoque de hoy</span><span class="overview-detail">Minutos registrados</span></button>
+    </div>
+    <div class="dashboard-body">
+      <div class="dashboard-main">
+        <div class="section-title first-section"><div><span class="eyebrow"></span><h2>Hoy</h2></div><button class="text-link" data-goto="tareas">Ver todas <span>→</span></button></div>
+        <div class="capture-card"><div class="capture-icon">＋</div><div class="capture-input"><input id="quickInput" aria-label="Captura rápida" placeholder="Añade una tarea, idea o recordatorio…"><div id="quickPreview" class="small"></div></div><button class="btn primary capture-add" id="quickAddBtn">Añadir</button><p class="capture-hint">Prueba: mañana · alta · 30 min · cada semana</p></div>
+        <div class="subsection-head"><h3>Para hoy</h3><span>Ordenadas por prioridad</span></div>
+        <div id="todayTasks"></div>
+        <div class="section-title habit-title"><div><span class="eyebrow"></span><h2>Tus hábitos</h2></div><button class="text-link" data-goto="habitos">Gestionar <span>→</span></button></div>
+        <div id="todayHabits"></div>
+        <div class="section-title"><div><span class="eyebrow"></span><h2>Plan del día</h2></div><button class="text-link" id="regenPlanBtn">Actualizar <span>↻</span></button></div>
+        <div class="card plan-card"><div class="plan-intro"><div><h3>Una propuesta para tu día</h3><p class="small">Prioriza tus tareas y busca huecos alrededor de tus compromisos con hora. No cambia tus fechas automáticamente.</p></div><button class="btn small" id="goFocusBtn">Iniciar enfoque →</button></div><div id="aiPlan"></div></div>
+      </div>
+      <aside class="dashboard-aside">
+        <div class="card checkin-card"><h2>¿Cómo estás hoy?</h2><p class="small">Elige cómo te sientes y cuánto tiempo tienes.</p>
+          <label>Energía</label><div class="energy-row" id="energyRow"><button class="energy-btn" data-e="baja"><span class="emo">○</span>Baja</button><button class="energy-btn" data-e="media" aria-pressed="true"><span class="emo">◐</span>Media</button><button class="energy-btn" data-e="alta"><span class="emo">●</span>Alta</button></div>
+          <label>Ánimo</label><div class="mood-row" id="moodRow"><button class="mood-btn" aria-label="Triste" title="Triste" data-m="&#128542;"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9 9.5h.01M15 9.5h.01M8 16c1-3 7-3 8 0"/></svg></button><button class="mood-btn" aria-label="Neutral" title="Neutral" data-m="&#128528;"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9 9.5h.01M15 9.5h.01M8 15h8"/></svg></button><button class="mood-btn" aria-label="Bien" title="Bien" data-m="&#128578;"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9 9.5h.01M15 9.5h.01M8 14c1 3 7 3 8 0"/></svg></button><button class="mood-btn" aria-label="Contento" title="Contento" data-m="&#128522;"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9 9.5h.01M15 9.5h.01M7.5 13.5c1 4 8 4 9 0"/></svg></button><button class="mood-btn" aria-label="Muy contento" title="Muy contento" data-m="&#129321;"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9 9.5h.01M15 9.5h.01M7.5 13.5c1 4 8 4 9 0"/></svg></button></div>
+          <div class="range-head"><label for="timeAvail">Tiempo disponible</label><b id="timeAvailLabel">4h</b></div><input type="range" id="timeAvail" min="1" max="12" step="0.5" value="4"><button class="btn save-checkin" id="saveEnergyBtn">Guardar <span>↗</span></button>
+        </div>
+        <div class="card progress-card"><div class="card-kicker"><span></span><span>↗</span></div><h2>Tu avance</h2><p class="small">Tareas completadas en tu lista.</p><div class="ring-wrap"><div class="ring"><svg width="110" height="110" viewBox="0 0 110 110"><circle cx="55" cy="55" r="48" fill="none" stroke="var(--line)" stroke-width="8"/><circle id="ringTasks" cx="55" cy="55" r="48" fill="none" stroke="var(--accent)" stroke-width="8" stroke-linecap="round" stroke-dasharray="301.6" stroke-dashoffset="301.6"/></svg><div class="center"><div><b id="ringTasksVal">0%</b><span>COMPLETADO</span></div></div></div><div><h3>Progreso total</h3><p class="small" id="progressText">—</p><div class="progress"><i id="progressBar" style="width:0%"></i></div></div></div></div>
+        <div class="card priority-card"><h2>Próximos pasos</h2><p class="small">Tus tres prioridades sugeridas.</p><div id="top3"></div><div id="insightBox"></div></div>
+      </aside>
+    </div>
+  </section>
+
+  <!-- TAREAS -->
+  <section class="view" id="view-tareas">
+    <div class="section-title" style="margin-top:18px;">
+      <h2>Mis tareas</h2>
+      <button class="btn primary small" id="newTaskBtn">+ Nueva tarea</button>
+    </div>
+    <div class="filters" id="taskFilters">
+      <button class="filter active" aria-pressed="true" data-f="todas">Todas</button>
+      <button class="filter" data-f="hoy">Hoy</button>
+      <button class="filter" data-f="vencidas">Vencidas</button>
+      <button class="filter" data-f="pendientes">Pendientes</button><button class="filter" data-f="semana">Próximos 7 días</button><button class="filter" data-f="sinfecha">Sin fecha</button>
+      <button class="filter" data-f="alta">Alta prioridad</button>
+      <button class="filter" data-f="hechas">Completadas</button>
+    </div>
+    <div class="task-toolbar">
+      <input id="searchTasks" placeholder="Buscar tareas…">
+      <select id="projectFilter" aria-label="Filtrar por proyecto">
+        <option value="">Todos los proyectos</option>
+      </select>
+      <select id="sortTasks" aria-label="Ordenar tareas">
+        <option value="smart">Orden inteligente</option>
+        <option value="plan">Por planificación</option>
+        <option value="due">Por fecha límite</option>
+        <option value="priority">Por prioridad</option>
+        <option value="new">Más recientes</option>
+      </select>
+    </div>
+    <div id="allTasks"></div>
+  </section>
+
+  <!-- PROYECTOS -->
+  <section class="view" id="view-proyectos">
+    <div class="section-title" style="margin-top:18px;">
+      <h2>Proyectos</h2>
+      <button class="btn primary small" id="newProjectBtn">+ Nuevo proyecto</button>
+    </div>
+    <p class="small" style="margin:-4px 0 16px;">Agrupa tareas relacionadas y sigue el avance sin mezclarlo con tu lista diaria.</p>
+    <div id="projectList"></div>
+  </section>
+
+  <!-- FINANZAS -->
+  <section class="view" id="view-finanzas">
+    <div class="calendar-heading"><div><h2>Finanzas personales</h2><p>Un registro sencillo de ingresos y gastos, sin conectar tus cuentas.</p></div><button class="btn primary" id="newTransactionBtn">+ Movimiento</button></div>
+    <div class="finance-toolbar"><div><label for="financeMonth">Mes</label><input type="month" id="financeMonth"></div><button class="btn" id="exportTransactionsBtn">Descargar CSV</button></div>
+    <div class="finance-summary"><article class="card finance-card"><span>Ingresos</span><b id="financeIncome">0 €</b><small id="financeIncomeCount">0 movimientos</small></article><article class="card finance-card expense"><span>Gastos</span><b id="financeExpense">0 €</b><small id="financeExpenseCount">0 movimientos</small></article><article class="card finance-card balance"><span>Balance del mes</span><b id="financeBalance">0 €</b><small>Ingresos menos gastos registrados</small></article></div>
+    <div class="card finance-breakdown"><h3>Gastos por categoría</h3><div id="financeCategories"></div></div>
+    <div class="section-title"><h2>Movimientos del mes</h2><span class="small" id="financeMovementCount"></span></div>
+    <div id="financeTransactions"></div>
+    <p class="small finance-disclaimer">Registro manual local. No es una cuenta bancaria, no se conecta con entidades financieras y no sustituye asesoramiento financiero.</p>
+  </section>
+
+  <!-- CALENDARIO -->
+  <section class="view" id="view-calendario">
+    <div class="calendar-heading"><div><h2>Calendario</h2><p>Compromisos, días planificados y fechas límite.</p></div><button class="btn primary" id="newEventBtn">+ Nuevo evento</button></div>
+    <div class="calendar-layout">
+      <div class="card calendar-card"><div class="calendar-toolbar"><div><h3 id="calendarMonth"></h3><p class="small">Selecciona un día para ver su agenda</p></div><div class="calendar-controls"><button class="cal-nav" id="calendarPrev" aria-label="Mes anterior">‹</button><button class="cal-today" id="calendarToday">Hoy</button><button class="cal-nav" id="calendarNext" aria-label="Mes siguiente">›</button></div></div>
+        <div class="cal-weekdays" aria-hidden="true"><span>L</span><span>M</span><span>X</span><span>J</span><span>V</span><span>S</span><span>D</span></div><div class="cal-grid" id="calendarGrid"></div><div class="cal-legend"><span><i class="dot-event"></i> Evento</span><span><i class="dot-scheduled"></i> Planificada</span><span><i class="dot-task"></i> Fecha límite</span></div>
+      </div>
+      <aside class="calendar-agenda"><div class="card"><div class="agenda-title"><div><span class="small">AGENDA DEL DÍA</span><h3 id="selectedDateLabel"></h3></div><button class="cal-nav" id="dayNewEvent" aria-label="Añadir evento">+</button></div><div id="dayAgenda"></div><div class="agenda-actions"><button class="btn" id="dayNewTask">+ Tarea para este día</button><button class="btn" id="exportCalendarBtn">Exportar eventos (.ics)</button></div><p class="small agenda-note">Calendario local. No se sincroniza con Apple Calendar ni envía avisos. Exporta los eventos para importarlos en otra app.</p></div></aside>
+    </div>
+  </section>
+
+  <!-- HÁBITOS -->
+  <section class="view" id="view-habitos">
+    <div class="section-title" style="margin-top:18px;">
+      <h2>Mis hábitos</h2>
+      <button class="btn primary small" id="newHabitBtn">+ Nuevo hábito</button>
+    </div>
+    <div class="card soft" style="margin-bottom:14px;">
+      <h3>Un margen para los días difíciles</h3>
+      <p class="small">Si un día fallas, FLUXO te da <b>1 día de gracia</b> si cumples al día siguiente. Así no pierdes tu racha por un día malo. La racha cuenta los días cumplidos, no el día de descanso.</p>
+    </div>
+    <div id="habitList"></div>
+  </section>
+
+  <!-- ENFOQUE -->
+  <section class="view" id="view-enfoque">
+    <div class="section-title" style="margin-top:18px;">
+      <h2>Modo enfoque</h2>
+      <span class="pill soft" id="focusTotal">0 min hoy</span>
+    </div>
+    <div class="grid grid-2">
+      <div class="card" style="text-align:center;">
+        <div class="mode-row" id="modeRow">
+          <button class="mode-btn active" aria-pressed="true" data-min="25">25<br><span class="small">Clásico</span></button>
+          <button class="mode-btn" data-min="50">50<br><span class="small">Profundo</span></button>
+          <button class="mode-btn" data-min="15">15<br><span class="small">Rápido</span></button>
+        </div>
+        <div class="timer-ring">
+          <svg width="240" height="240" viewBox="0 0 240 240">
+            <circle cx="120" cy="120" r="108" fill="none" stroke="var(--line)" stroke-width="14"/>
+            <circle id="timerCircle" cx="120" cy="120" r="108" fill="none" stroke="var(--accent)" stroke-width="14" stroke-linecap="round" stroke-dasharray="678.6" stroke-dashoffset="0"/>
+          </svg>
+          <div class="timer-center"><div><b id="timerText">25:00</b><span id="timerLabel">Listo para enfocar</span></div></div>
+        </div>
+        <label style="text-align:left;">Enfocarme en…</label>
+        <select id="focusTaskSelect"></select>
+        <div class="btn-row" style="margin-top:12px;">
+          <button class="btn primary" id="timerStartBtn">Iniciar</button>
+          <button class="btn" id="timerPauseBtn"> Pausar</button>
+          <button class="btn" id="timerResetBtn">Reiniciar</button>
+        </div>
+        <p class="small" style="margin-top:10px;">Al terminar ganas <b>+1 XP por minuto</b> y se registra en tus estadísticas. Mantén la app abierta: el temporizador no se conserva si la cierras.</p>
+      </div>
+      <div>
+        <div class="card" style="margin-bottom:14px;">
+          <h3>Antes de empezar</h3>
+          <p class="small">Marca cada paso antes de empezar. Reduce distracciones.</p>
+          <div id="ritualList" style="margin-top:10px;"></div>
+        </div>
+        <div class="card">
+          <h3>Sesiones recientes</h3>
+          <div id="focusLog" style="margin-top:10px;"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- METAS -->
+  <section class="view" id="view-metas">
+    <div class="section-title" style="margin-top:18px;">
+      <h2>Metas y progreso</h2>
+      <button class="btn primary small" id="newGoalBtn">+ Nueva meta</button>
+    </div>
+    <div class="grid grid-2">
+      <div class="card">
+        <h3>Minutos de enfoque · últimos 7 días</h3>
+        <div class="bars" id="weekChart"></div>
+        <p class="small" id="weekSummary" style="margin-top:8px;"></p>
+      </div>
+      <div class="card">
+        <h3>Tu actividad en perspectiva</h3>
+        <div id="patterns" style="margin-top:10px;"></div>
+      </div>
+    </div>
+    <div class="section-title"><h2>Mis metas</h2></div>
+    <div id="goalList"></div>
+    <div class="card soft" style="margin-top:14px;">
+      <h3>Tu nivel</h3>
+      <p class="small" id="levelText">—</p>
+      <div class="progress" style="margin-top:10px;"><i id="levelBar" style="width:0%"></i></div>
+      <p class="small" id="levelNext" style="margin-top:6px;"></p>
+    </div>
+  </section>
+
+  <!-- NOTAS -->
+  <section class="view" id="view-notas">
+    <div class="section-title" style="margin-top:18px;">
+      <h2>Notas y diario</h2>
+    </div>
+    <div class="card">
+      <textarea id="noteInput" placeholder="Escribe una idea, reflexión o nota rápida…"></textarea>
+      <div class="btn-row" style="margin-top:10px;">
+        <button class="btn primary" id="saveNoteBtn">Guardar nota</button>
+        <button class="btn" id="noteToTaskBtn">Convertir en tarea</button>
+      </div>
+    </div>
+    <div class="section-title"><h2>Mis notas</h2></div>
+    <div id="noteList"></div>
+  </section>
+
+  <!-- AJUSTES -->
+  <section class="view" id="view-ajustes">
+    <div class="section-title" style="margin-top:18px;">
+      <h2>Ajustes y datos</h2>
+    </div>
+    <div class="grid grid-2">
+      <div class="card">
+        <h3>Tu perfil</h3>
+        <label>Tu nombre</label>
+        <input id="nameInput" placeholder="Ej: Alex">
+        <label>Tema</label>
+        <select id="themeSelect">
+          <option value="light"> Claro</option>
+          <option value="dark"> Oscuro</option>
+        </select>
+        <div class="btn-row" style="margin-top:14px;">
+          <button class="btn primary" id="saveProfileBtn">Guardar perfil</button>
+        </div>
+      </div>
+      <div class="card">
+        <h3>Tus datos y tu privacidad</h3>
+        <p class="small">FLUXO guarda tus datos localmente en este navegador o app instalada. No sincroniza dispositivos. Exporta copias con frecuencia.</p>
+        <div class="btn-row" style="margin-top:12px;">
+          <button class="btn" id="exportBtn">Exportar copia</button>
+          <button class="btn" id="importBtn">Importar</button>
+          <input type="file" id="importFile" accept=".json" style="display:none;">
+        </div>
+        <div class="btn-row" style="margin-top:10px;">
+          <button class="btn" id="printBtn">Imprimir resumen</button>
+          <button class="btn" id="seedBtn">Cargar ejemplo</button>
+        </div>
+        <div class="btn-row" style="margin-top:10px;">
+          <button class="btn" id="resetBtn" style="color:var(--red); border-color:#FFC9B8;">Borrar todo</button>
+        </div>
+      </div>
+    </div>
+    <div class="card soft" style="margin-top:14px;">
+      <h3>Instalar en el iPad</h3>
+      <ol style="padding-left:20px; margin:10px 0;">
+        <li>Publica FLUXO en una dirección <b>HTTPS</b> y ábrela en Safari. No abras <code>index.html</code> desde el ZIP o Archivos para instalarla.</li>
+        <li>Toca <b>Compartir</b> y elige <b>Añadir a pantalla de inicio</b>.</li>
+        <li>Si aparece la opción <b>Abrir como app web</b>, actívala y toca <b>Añadir</b>.</li>
+        <li>Luego abre FLUXO tocando su <b>icono en la pantalla de inicio</b>. Se iniciará en una ventana independiente, sin la barra de Safari. La primera vez necesita conexión para preparar el modo sin conexión.</li>
+      </ol>
+      <p class="small">Abre la app instalada con internet al menos una vez para preparar el modo sin conexión. Los datos de Safari y de la app instalada pueden estar separados; importa una copia si ya habías empezado. Guarda copias de seguridad: el navegador puede borrar datos locales, por ejemplo al eliminar la app.</p>
+    </div>
+    <div class="card" style="margin-top:14px;">
+      <h3>Cómo funciona el plan</h3>
+      <ul style="padding-left:20px; margin:10px 0; color:var(--muted); font-size:14px;">
+        <li><b>Puntuación inteligente (0-100):</b> urgencia por fecha + prioridad + coincidencia con tu energía + si cabe en tu tiempo disponible.</li>
+        <li><b>Plan del día:</b> combina prioridad, vencimiento, energía y tiempo disponible; evita los eventos con hora y propone descansos. Es orientativo: no cambia tus fechas ni sustituye una agenda sincronizada.</li>
+        <li><b>Planificar vs. fecha límite:</b> indica cuándo quieres empezar y cuándo debe estar terminado; ambas fechas pueden ser distintas.</li>
+        <li><b>Repetición:</b> al completar una tarea repetitiva se crea la siguiente ocasión. Las tareas y eventos se guardan solo en este dispositivo.</li>
+        <li><b>Finanzas:</b> registra manualmente ingresos y gastos en euros y exporta el mes a CSV. No conecta con tu banco ni importa movimientos automáticamente.</li>
+        <li><b>Captura natural:</b> reconoce fechas sencillas (“mañana”), prioridad (“alta”), duración (“30 min”) y repetición (“cada semana”) al final del texto.</li>
+        <li><b>Patrones:</b> muestra resúmenes básicos de tus registros. No utiliza un modelo de IA ni aprende de ellos.</li>
+      </ul>
+    </div>
+  </section>
+
+</main>
+
+<button id="navBackdrop" type="button" aria-label="Cerrar menú de navegación" tabindex="-1"></button>
+<nav id="bottomNav" aria-label="Navegación principal"><div class="side-brand"><span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="2.7" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 8H10c4 0 6 2 9 5l6 5M2.5 18H25M2.5 28H10c4 0 6-2 9-5l6-5M22 12l6 6-6 6"/></svg></span><div><b>fluxo</b><small>ORGANIZADOR PERSONAL</small></div><button class="icon-btn menu-close" id="menuClose" aria-label="Cerrar menú"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div><div class="nav-section"><div class="side-label">Planificación</div><div class="nav-links"><button class="nav-btn active" aria-current="page" data-view="hoy"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5V21h-6v-6H9v6H3z"/></svg><span>Hoy</span></button><button class="nav-btn " data-view="tareas"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="m8 10 1.5 1.5L12 9m2 1h3M8 15h9"/></svg><span>Tareas</span></button><button class="nav-btn" data-view="proyectos"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 7.5h6l2 2h9v10a1.5 1.5 0 0 1-1.5 1.5h-14A1.5 1.5 0 0 1 3.5 19z"/><path d="M3.5 7.5V5.8A1.8 1.8 0 0 1 5.3 4h4.2l2 2h5"/></svg><span>Proyectos</span></button><button class="nav-btn" data-view="calendario"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15.5" rx="2"/><path d="M7.5 3v4M16.5 3v4M4 9h16M8 13h2M13 13h3M8 16.5h2"/></svg><span>Calendario</span></button></div></div>
+<div class="nav-section"><div class="side-label">Ritmo y progreso</div><div class="nav-links"><button class="nav-btn " data-view="habitos"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21v-9m0 4C7 16 4 13 4 8c5 0 8 3 8 8Zm0-4c0-5 3-8 8-8 0 5-3 8-8 8Z"/></svg><span>Hábitos</span></button><button class="nav-btn " data-view="enfoque"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><span>Enfoque</span></button><button class="nav-btn " data-view="metas"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/></svg><span>Metas</span></button></div></div>
+<div class="nav-section"><div class="side-label">Personal</div><div class="nav-links"><button class="nav-btn" data-view="finanzas"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 9h18M7 15h3M16 13v3"/><circle cx="16" cy="8" r="1"/></svg><span>Finanzas</span></button><button class="nav-btn " data-view="notas"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h9l3 3v15H6zM14 3v4h4M9 11h6M9 15h6"/></svg><span>Notas</span></button></div></div><div class="side-bottom"><span class="side-dot"></span><div><b>Datos guardados</b><small>En este dispositivo</small></div></div></nav>
+
+<!-- Modal Tarea -->
+<div class="modal-overlay" id="modalTaskOverlay">
+  <div class="modal" role="dialog" aria-modal="true">
+    <div class="modal-head"><h2 id="modalTaskTitle">Nueva tarea</h2><button class="icon-btn" aria-label="Cerrar" data-close="modalTaskOverlay"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+    <input type="hidden" id="taskId">
+    <label>Título *</label>
+    <input id="taskTitle" placeholder="¿Qué hay que hacer?">
+    <div class="form-grid">
+      <div><label for="taskCategory">Área</label>
+        <select id="taskCategory">
+          <option>Trabajo</option><option>Estudio</option><option>Salud</option><option>Casa</option><option>Personal</option><option>Finanzas</option><option>Otro</option>
+        </select>
+      </div>
+      <div><label for="taskProject">Proyecto (opcional)</label><input id="taskProject" list="projectOptions" placeholder="Ej.: Renovar la casa"><datalist id="projectOptions"></datalist></div>
+      <div><label for="taskScheduled">Planificar para</label><input type="date" id="taskScheduled"><span class="small">El día en que quieres trabajar en ella.</span></div>
+      <div><label for="taskDue">Fecha límite</label><input type="date" id="taskDue"><span class="small">La fecha tope para terminarla.</span></div>
+    </div>
+    <div class="form-grid">
+      <div><label for="taskRepeat">Repetición</label><select id="taskRepeat"><option value="none">No se repite</option><option value="daily">Cada día</option><option value="weekdays">De lunes a viernes</option><option value="weekly">Cada semana</option><option value="monthly">Cada mes</option></select></div>
+      <div id="taskRepeatEndWrap" hidden><label for="taskRepeatEnd">Repetir hasta (opcional)</label><input type="date" id="taskRepeatEnd"></div>
+    </div>
+    <p class="small" id="repeatHelp" style="margin-top:6px;" hidden>Al completar una tarea recurrente, FLUXO crea la siguiente ocasión y conserva esta como completada.</p>
+    <label>Prioridad</label>
+    <div class="seg" id="taskPrioritySeg">
+      <button data-v="baja">Baja</button><button data-v="media" class="active">Media</button><button data-v="alta">Alta</button>
+    </div>
+    <label>Energía que necesita</label>
+    <div class="seg" id="taskEnergySeg">
+      <button data-v="baja">Ligera</button><button data-v="media" class="active">Media</button><button data-v="alta">Alta</button>
+    </div>
+    <div class="form-grid">
+      <div><label>Duración (min)</label><input type="number" id="taskDuration" min="5" step="5" value="30"></div>
+      <div><label>Notas (opcional)</label><input id="taskNotes" placeholder="Detalles…"></div>
+    </div>
+    <label for="taskSubtasks">Pasos de la tarea <span style="font-weight:400;text-transform:none">(uno por línea)</span></label>
+    <textarea id="taskSubtasks" placeholder="Divide esta tarea en pasos más pequeños"></textarea>
+    <div class="btn-row" style="margin-top:18px;">
+      <button class="btn primary" id="saveTaskBtn">Guardar tarea</button>
+      <button class="btn" data-close="modalTaskOverlay">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal proyecto -->
+<div class="modal-overlay" id="modalProjectOverlay"><div class="modal" role="dialog" aria-modal="true" aria-labelledby="projectModalTitle"><div class="modal-head"><h2 id="projectModalTitle">Nuevo proyecto</h2><button class="icon-btn" aria-label="Cerrar" data-close="modalProjectOverlay"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div><input type="hidden" id="projectOldName"><label for="projectName">Nombre del proyecto *</label><input id="projectName" maxlength="80" placeholder="Ej.: Reforma de la cocina"><p class="small">Las tareas se pueden asignar a un proyecto desde su ficha. Cambiar el nombre actualiza sus tareas; eliminarlo las deja sin proyecto, sin borrar ninguna.</p><div class="btn-row" style="margin-top:18px"><button class="btn primary" id="saveProjectBtn">Guardar proyecto</button><button class="btn" data-close="modalProjectOverlay">Cancelar</button></div></div></div>
+
+<!-- Modal movimiento financiero -->
+<div class="modal-overlay" id="modalTransactionOverlay"><div class="modal" role="dialog" aria-modal="true" aria-labelledby="transactionModalTitle"><div class="modal-head"><h2 id="transactionModalTitle">Nuevo movimiento</h2><button class="icon-btn" aria-label="Cerrar" data-close="modalTransactionOverlay"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div><input type="hidden" id="transactionId"><label for="transactionType">Tipo</label><select id="transactionType"><option value="expense">Gasto</option><option value="income">Ingreso</option></select><label for="transactionTitle">Concepto *</label><input id="transactionTitle" maxlength="100" placeholder="Ej.: Compra semanal"><div class="form-grid"><div><label for="transactionAmount">Importe (€)</label><input id="transactionAmount" type="number" min="0.01" max="1000000" step="0.01" inputmode="decimal" placeholder="0,00"></div><div><label for="transactionCategory">Categoría</label><select id="transactionCategory"><option>Alimentación</option><option>Vivienda</option><option>Transporte</option><option>Salud</option><option>Ocio</option><option>Servicios</option><option>Ahorro</option><option>Salario</option><option>Otros</option></select></div></div><label for="transactionDate">Fecha</label><input id="transactionDate" type="date"><label for="transactionNotes">Nota (opcional)</label><textarea id="transactionNotes" placeholder="Detalle adicional"></textarea><div class="btn-row" style="margin-top:18px"><button class="btn primary" id="saveTransactionBtn">Guardar movimiento</button><button class="btn" data-close="modalTransactionOverlay">Cancelar</button></div></div></div>
+
+<!-- Modal evento -->
+<div class="modal-overlay" id="modalEventOverlay"><div class="modal" role="dialog" aria-modal="true" aria-labelledby="eventModalTitle"><div class="modal-head"><h2 id="eventModalTitle">Nuevo evento</h2><button class="icon-btn" aria-label="Cerrar" data-close="modalEventOverlay"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div><input type="hidden" id="eventId"><label for="eventTitle">Título *</label><input id="eventTitle" placeholder="Añade un evento"><div class="form-grid"><div><label for="eventDate">Fecha *</label><input id="eventDate" type="date"></div><div><label for="eventTime">Hora de inicio (opcional)</label><input id="eventTime" type="time"></div></div><label for="eventDuration">Duración (minutos, solo si hay hora)</label><input id="eventDuration" type="number" min="5" max="1440" step="5" value="60"><label for="eventNotes">Notas (opcional)</label><textarea id="eventNotes" placeholder="Lugar, detalles o enlace"></textarea><p class="small">Sin hora, se considera un evento de todo el día. No se envían recordatorios.</p><div class="btn-row" style="margin-top:18px"><button class="btn primary" id="saveEventBtn">Guardar evento</button><button class="btn" data-close="modalEventOverlay">Cancelar</button></div></div></div>
+
+<!-- Modal Hábito -->
+<div class="modal-overlay" id="modalHabitOverlay">
+  <div class="modal" role="dialog" aria-modal="true">
+    <div class="modal-head"><h2>Nuevo hábito</h2><button class="icon-btn" aria-label="Cerrar" data-close="modalHabitOverlay"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+    <label>Nombre del hábito *</label>
+    <input id="habitName" placeholder="Ej: Leer 20 min, Beber agua, Meditar…">
+    <label>Icono</label>
+    <div class="habit-types" id="habitIconRow"><button class="mood-btn active" aria-pressed="true" data-i="general">General</button><button class="mood-btn" data-i="lectura">Lectura</button><button class="mood-btn" data-i="agua">Agua</button><button class="mood-btn" data-i="movimiento">Movimiento</button><button class="mood-btn" data-i="bienestar">Bienestar</button><button class="mood-btn" data-i="diario">Diario</button></div>
+    <label>XP por cumplirlo</label>
+    <select id="habitXP"><option value="5">5 XP (ligero)</option><option value="10" selected>10 XP (normal)</option><option value="15">15 XP (exigente)</option></select>
+    <div class="btn-row" style="margin-top:18px;">
+      <button class="btn primary" id="saveHabitBtn">Guardar hábito</button>
+      <button class="btn" data-close="modalHabitOverlay">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Meta -->
+<div class="modal-overlay" id="modalGoalOverlay">
+  <div class="modal" role="dialog" aria-modal="true">
+    <div class="modal-head"><h2>Nueva meta</h2><button class="icon-btn" aria-label="Cerrar" data-close="modalGoalOverlay"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+    <label>Título de la meta *</label>
+    <input id="goalTitle" placeholder="Ej: Leer 12 libros este año">
+    <div class="form-grid">
+      <div><label>Objetivo (número)</label><input type="number" id="goalTarget" min="1" value="10"></div>
+      <div><label>Unidad</label><input id="goalUnit" placeholder="libros, km, sesiones…"></div>
+    </div>
+    <label>Fecha límite (opcional)</label>
+    <input type="date" id="goalDue">
+    <div class="btn-row" style="margin-top:18px;">
+      <button class="btn primary" id="saveGoalBtn">Guardar meta</button>
+      <button class="btn" data-close="modalGoalOverlay">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+"use strict";
+/* ============ FLUXO — Motor de organización inteligente ============ */
+const LS_KEY = "fluxo_data_v2";
+const $ = (s, r=document) => r.querySelector(s);
+const $$ = (s, r=document) => [...r.querySelectorAll(s)];
+const uid = () => Math.random().toString(36).slice(2,9) + Date.now().toString(36).slice(-4);
+const todayStr = () => { const d=new Date(); return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); };
+const addDays = (base, n) => { const d=new Date(base+"T12:00:00"); d.setDate(d.getDate()+n); return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); };
+const fmtDate = (s) => { if(!s) return "Sin fecha"; const d=new Date(s+"T12:00:00"); return d.toLocaleDateString("es-ES",{weekday:"short",day:"numeric",month:"short",...(d.getFullYear()!==new Date().getFullYear()?{year:"numeric"}:{})}); };
+const esc = (s) => String(s??"").replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const clamp=(n,a,b)=>Math.max(a,Math.min(b,n));
+
+let DB = null;
+
+function defaultDB(){
+  return {
+    tasks:[], habits:[], goals:[], notes:[], focusSessions:[], events:[], projects:[], transactions:[],
+    xp:0, name:"", theme:"light",
+    checkins:{}, // date -> {energy, mood, timeAvailable}
+    ritual:{},   // id -> bool (reset daily-ish, kept simple)
+    createdAt: Date.now()
+  };
+}
+function loadDB(){
+  try{
+    const raw = localStorage.getItem(LS_KEY);
+    if(raw){ DB = Object.assign(defaultDB(), JSON.parse(raw)); }
+    else { DB = defaultDB(); saveDB(); }
+    const isRecord=x=>x&&typeof x==="object"&&!Array.isArray(x);
+    const lists=["tasks","habits","goals","notes","focusSessions","events","projects","transactions"];
+    lists.forEach(key=>{ if(!Array.isArray(DB[key]))DB[key]=[]; });
+    ["tasks","habits","goals","notes","focusSessions","events","transactions"].forEach(key=>{ DB[key]=DB[key].filter(isRecord); });
+    if(!isRecord(DB.checkins))DB.checkins={};
+    if(!isRecord(DB.ritual))DB.ritual={};
+    DB.habits.forEach(h=>{if(!isRecord(h.history))h.history={};});
+    DB.tasks.forEach(t=>{if(!Array.isArray(t.subtasks))t.subtasks=[];});
+    if(!Number.isFinite(DB.xp)||DB.xp<0)DB.xp=0;
+    if(typeof DB.name!=="string")DB.name="";
+    if(!["light","dark"].includes(DB.theme))DB.theme="light";
+    DB.projects=[...new Set(DB.projects.filter(x=>typeof x==="string").map(x=>x.trim()).filter(Boolean))];
+    DB.tasks.forEach(t=>{ if(typeof t.project==="string")t.project=t.project.trim();if(t.project && !DB.projects.some(x=>x.toLocaleLowerCase()===t.project.toLocaleLowerCase())) DB.projects.push(t.project); });
+  }catch(e){
+    // Preserve the original payload before recovering, so a parsing/storage
+    // problem does not silently destroy the only local copy of the user's data.
+    try{
+      const raw = localStorage.getItem(LS_KEY);
+      if(raw) localStorage.setItem(LS_KEY + "_recovery_" + Date.now(), raw);
+    }catch(recoveryError){ console.error("No se pudo crear la copia de recuperación:", recoveryError); }
+    DB = defaultDB();
+    try{
+      setTimeout(()=>alert("FLUXO no pudo leer los datos guardados. Ha intentado conservar una copia de recuperación en este dispositivo. Revisa Ajustes y exporta una copia de seguridad cuando puedas."), 0);
+    }catch(alertError){}
+  }
+}
+function saveDB(){
+  try{ localStorage.setItem(LS_KEY, JSON.stringify(DB)); return true; }catch(e){ console.error(e); alert("No se pudieron guardar los datos. Comprueba el almacenamiento de tu navegador y exporta una copia."); return false; }
+}
+function seedExample(announce=true){
+  const t = todayStr();
+  if(DB.tasks.length===0){
+    DB.tasks = [
+      {id:uid(), title:"Preparar presentación del proyecto", category:"Trabajo", priority:"alta", energy:"alta", duration:60, due:t, done:false, notes:"Revisar diapositivas clave", createdAt:Date.now()-86400000},
+      {id:uid(), title:"Enviar informe semanal", category:"Trabajo", priority:"alta", energy:"media", duration:30, due:t, done:false, notes:"", createdAt:Date.now()-86400000},
+      {id:uid(), title:"Leer 20 páginas", category:"Estudio", priority:"media", energy:"baja", duration:25, due:t, done:false, notes:"", createdAt:Date.now()-86400000},
+      {id:uid(), title:"Llamar a Ana para coordinar viaje", category:"Personal", priority:"media", energy:"baja", duration:15, due:addDays(t,1), done:false, notes:"", createdAt:Date.now()-86400000},
+      {id:uid(), title:"Ordenar escritorio y preparar mañana", category:"Casa", priority:"baja", energy:"baja", duration:20, due:t, done:false, notes:"", createdAt:Date.now()-86400000},
+      {id:uid(), title:"Entrenamiento de fuerza", category:"Salud", priority:"media", energy:"alta", duration:45, due:addDays(t,1), done:false, notes:"", createdAt:Date.now()-86400000},
+    ];
+  }
+  if(DB.habits.length===0){
+    const h1=uid(), h2=uid(), h3=uid();
+    const hist={};
+    hist[addDays(t,-1)]=true; hist[addDays(t,-2)]=true; hist[addDays(t,-3)]=true;
+    DB.habits=[
+      {id:h1, name:"Beber 2L de agua", icon:"agua", xp:5, history:{...hist}},
+      {id:h2, name:"Leer 20 minutos", icon:"lectura", xp:10, history:{[addDays(t,-1)]:true,[addDays(t,-2)]:true}},
+      {id:h3, name:"Meditar 10 minutos", icon:"bienestar", xp:10, history:{[addDays(t,-1)]:true}},
+    ];
+  }
+  if(DB.goals.length===0){
+    DB.goals=[
+      {id:uid(), title:"Leer 12 libros este año", target:12, current:4, unit:"libros", due:`${new Date().getFullYear()}-12-31`},
+      {id:uid(), title:"Correr 100 km", target:100, current:23, unit:"km", due:`${new Date().getFullYear()}-12-31`},
+    ];
+  }
+  if(DB.notes.length===0){
+    DB.notes=[{id:uid(), text:"Idea: preparar el plan de la semana el domingo por la noche. 15 min ahorran horas de improvisación.", date:t, createdAt:Date.now()}];
+  }
+  if(announce) toast(" Datos de ejemplo cargados.");
+}
+
+/* ---------- Inteligencia ---------- */
+function getTodayCheckin(){
+  return DB.checkins[todayStr()] || {energy:"media", mood:"\u{1F642}", timeAvailable:4};
+}
+function smartScore(task){
+  const t = todayStr();
+  let score = 0; const reasons=[];
+  // Urgencia
+  if(task.due){
+    const days = Math.round((new Date(task.due+"T12:00:00") - new Date(t+"T12:00:00"))/86400000);
+    if(days < 0){ score+=50; reasons.push("vencida"); }
+    else if(days===0){ score+=40; reasons.push("hoy"); }
+    else if(days===1){ score+=30; reasons.push("mañana"); }
+    else if(days<=3){ score+=20; reasons.push("pronto"); }
+    else { score+=10; }
+    if(task.scheduled===t){score+=15;reasons.push("planificada para hoy");}
+    else if(task.scheduled&&task.scheduled<t){score+=10;reasons.push("planificación pendiente");}
+  } else if(task.scheduled){
+    const days=Math.round((new Date(task.scheduled+"T12:00:00")-new Date(t+"T12:00:00"))/86400000);
+    if(days<0){score+=25;reasons.push("planificada anteriormente");}
+    else if(days===0){score+=25;reasons.push("planificada para hoy");}
+    else if(days===1){score+=16;reasons.push("planificada para mañana");}
+    else if(days<=7)score+=10;
+    else score+=5;
+  } else score+=5;
+  // Prioridad
+  if(task.priority==="alta"){ score+=30; reasons.push("alta prioridad"); }
+  else if(task.priority==="media") score+=20;
+  else score+=10;
+  // Energía
+  const energy = getTodayCheckin().energy;
+  const order={baja:1,media:2,alta:3};
+  const diff = Math.abs(order[task.energy||"media"] - order[energy]);
+  if(diff===0){ score+=15; reasons.push("encaja con tu energía"); }
+  else if(diff===1) score+=5;
+  else score-=10;
+  // Duración vs tiempo disponible
+  const availMin = (getTodayCheckin().timeAvailable||4)*60;
+  if((task.duration||30) <= availMin) score+=5;
+  if(task.done) score=0;
+  return {score: clamp(score,0,100), reasons};
+}
+function repeatLabel(value){return ({daily:"Cada día",weekdays:"De lunes a viernes",weekly:"Cada semana",monthly:"Cada mes"})[value]||"No se repite";}
+function nextRepeatDate(date,repeat){
+  if(!date) date=todayStr();
+  const d=new Date(date+"T12:00:00"), originalDay=d.getDate();
+  if(repeat==="daily") d.setDate(d.getDate()+1);
+  else if(repeat==="weekdays"){d.setDate(d.getDate()+1);while(d.getDay()===0||d.getDay()===6)d.setDate(d.getDate()+1);}
+  else if(repeat==="weekly") d.setDate(d.getDate()+7);
+  else if(repeat==="monthly"){d.setDate(1);d.setMonth(d.getMonth()+1);d.setDate(Math.min(originalDay,new Date(d.getFullYear(),d.getMonth()+1,0).getDate()));}
+  return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+}
+function taskAvailableOnDay(task,day=todayStr()){
+  if(task.done)return false;
+  if(task.due && task.due<=day)return true;
+  if(task.scheduled)return task.scheduled<=day;
+  return !task.due || task.due<=day;
+}
+function plannedDate(task){return task.scheduled||task.due||"";}
+function sortedTasks(list){
+  return [...list].sort((a,b)=>{
+    if(a.done!==b.done) return a.done?1:-1;
+    return smartScore(b).score - smartScore(a).score;
+  });
+}
+function levelFromXP(xp){
+  const level = Math.floor(Math.sqrt(xp/40))+1;
+  const curMin = Math.pow(level-1,2)*40;
+  const nextMin = Math.pow(level,2)*40;
+  const pct = clamp(((xp-curMin)/(nextMin-curMin))*100,0,100);
+  return {level, pct, curMin, nextMin};
+}
+function streakForHabit(h){
+  let streak=0, d=todayStr(), graceUsed=false;
+  if(!h.history[d]) d=addDays(d,-1);
+  // Un día sin registrar puede quedar entre dos días cumplidos, una vez por racha.
+  while(true){
+    if(h.history[d]){ streak++; d=addDays(d,-1); continue; }
+    const previous=addDays(d,-1);
+    if(streak>0 && !graceUsed && h.history[previous]){ graceUsed=true; d=previous; continue; }
+    break;
+  }
+  return streak;
+}
+function bestStreak(){
+  if(!DB.habits.length) return 0;
+  return Math.max(...DB.habits.map(streakForHabit));
+}
+function addXP(n){ DB.xp += n; saveDB(); renderHeader(); }
+function parseNatural(text){
+  const raw=text.trim(); let title=raw, priority="media", energy="media", duration=30, due="", category="Personal";
+  // Solo se retiran metadatos al final para no alterar el sentido del título.
+  let changed=true, hasDuration=false, hasPriority=false, hasDate=false, hasRepeat=false, scheduled="", repeat="none";
+  while(changed){
+    changed=false; let m;
+    if(!hasDuration && (m=title.match(/(?:^|\s)(\d+)\s*(minutos?|mins?|m|horas?|h)\s*$/i))){
+      duration=clamp(parseInt(m[1],10)*(/^h/i.test(m[2])?60:1),5,480);title=title.slice(0,m.index).trim();hasDuration=true;changed=true;continue;
+    }
+    if(!hasPriority && (m=title.match(/(?:^|\s)(alta|baja|urgente|prioritario)\s*$/i)) && !(/^alta$/i.test(m[1]) && /\bde\s*$/i.test(title.slice(0,m.index)))){
+      priority=/^(alta|urgente|prioritario)$/i.test(m[1])?"alta":"baja";title=title.slice(0,m.index).trim();hasPriority=true;changed=true;continue;
+    }
+    if(!hasDate && (m=title.match(/(?:^|\s)(pasado mañana|pasado manana|mañana|manana|hoy|en\s+\d+\s+días?|en\s+\d+\s+dias?)\s*$/i))){
+      const v=m[1].toLowerCase();
+      const offset=v.startsWith('pasado')?2:(v==='hoy'?0:v.startsWith('mañana')||v.startsWith('manana')?1:(parseInt(v.match(/\d+/)[0],10)));
+      scheduled=addDays(todayStr(),offset);title=title.slice(0,m.index).trim();hasDate=true;changed=true;continue;
+    }
+    if(!hasDate && (m=title.match(/(?:^|\s)(?:el\s+|este\s+|próximo\s+|proximo\s+)?(lunes|martes|miércoles|miercoles|jueves|viernes|sábado|sabado|domingo)\s*$/i))){
+      const names={domingo:0,lunes:1,martes:2,miercoles:3,miércoles:3,jueves:4,viernes:5,sabado:6,sábado:6};
+      const target=names[m[1].toLowerCase()], current=new Date(todayStr()+"T12:00:00").getDay();
+      scheduled=addDays(todayStr(),((target-current+7)%7)||7);title=title.slice(0,m.index).trim();hasDate=true;changed=true;continue;
+    }
+    if(!hasRepeat && (m=title.match(/(?:^|\s)(cada\s+día|cada\s+dia|cada\s+semana|cada\s+mes|de\s+lunes\s+a\s+viernes)\s*$/i))){
+      const r=m[1].toLowerCase();repeat=r.includes('lunes')?'weekdays':r.includes('semana')?'weekly':r.includes('mes')?'monthly':'daily';title=title.slice(0,m.index).trim();hasRepeat=true;changed=true;
+    }
+  }
+  const low=raw.toLowerCase();
+  const cats={trabajo:"Trabajo",estudio:"Estudio",salud:"Salud",casa:"Casa",personal:"Personal",finanzas:"Finanzas"};
+  for(const k in cats){if(new RegExp('(?:^|\\s)'+k+'(?:$|\\s|[.,])','i').test(low)){category=cats[k];break;}}
+  if(/entrenar|deporte|correr|gym|presentación|presentacion|reunión|reunion/i.test(low)) energy="alta";
+  else if(/leer|meditar|ordenar|llamar|email|correo/i.test(low)) energy="baja";
+  title=(title||raw).replace(/\s+/g," ").trim();title=title.charAt(0).toUpperCase()+title.slice(1);
+  return {title,priority,energy,duration,due,scheduled,repeat,category};
+}
+function generatePlan(day=todayStr()){
+  const pending=sortedTasks(DB.tasks.filter(t=>taskAvailableOnDay(t,day)));
+  const availMin=(day===todayStr()?getTodayCheckin().timeAvailable:4)*60;
+  const events=DB.events.filter(e=>e.date===day);
+  const blocks=events.filter(e=>e.time).map(e=>{
+    const start=Number(e.time.slice(0,2))*60+Number(e.time.slice(3,5));
+    return {...e,start,end:Math.min(start+Number(e.duration||60),1440)};
+  }).sort((a,b)=>a.start-b.start);
+  const now=new Date();
+  let cursor=day===todayStr()?Math.max(9*60,Math.ceil((now.getHours()*60+now.getMinutes())/15)*15):9*60;
+  const planStart=cursor;let used=0,sinceBreak=0;const items=[];
+  const findSlot=(from,duration)=>{
+    let candidate=from, guard=0;
+    while(guard++<blocks.length+2){
+      const conflict=blocks.find(e=>candidate<e.end && candidate+duration>e.start);
+      if(!conflict)break;
+      candidate=conflict.end;
+    }
+    return candidate;
+  };
+  for(const task of pending){
+    const duration=Number(task.duration||30);
+    if(used+duration>availMin)continue;
+    if(sinceBreak>=90 && used+15+duration<=availMin){
+      const start=findSlot(cursor,15);
+      if(start+15<=21*60){items.push({minute:start,time:minuteTime(start),break:true,label:"Descanso de 15 min · estírate y respira"});cursor=start+15;used+=15;sinceBreak=0;}
+    }
+    const start=findSlot(cursor,duration);
+    if(start+duration>21*60)continue;
+    items.push({minute:start,time:minuteTime(start),task});cursor=start+duration;used+=duration;sinceBreak+=duration;
+    if(items.filter(x=>x.task||x.break).length>=8)break;
+  }
+  blocks.forEach(event=>{if(event.end>planStart || day!==todayStr())items.push({minute:event.start,time:minuteTime(event.start),event});});
+  events.filter(e=>!e.time).forEach(event=>items.push({minute:-1,time:"Todo el día",event}));
+  items.sort((a,b)=>a.minute-b.minute);
+  return {items,used,availMin,allDayCount:events.filter(e=>!e.time).length};
+}
+function minuteTime(minute){return String(Math.floor(minute/60)).padStart(2,"0")+":"+String(minute%60).padStart(2,"0");}
+
+/* ---------- Render ---------- */
+function toast(msg){
+  const el=$("#toast"); el.textContent=msg; el.classList.add("show");
+  clearTimeout(el._t); el._t=setTimeout(()=>el.classList.remove("show"),2600);
+}
+function renderHeader(){
+  const now=new Date();
+  $("#pillDate").textContent = now.toLocaleDateString("es-ES",{weekday:"short",day:"numeric",month:"short"});
+  $("#pillStreak").textContent = `${bestStreak()} días de racha`;
+  const lv=levelFromXP(DB.xp);
+  $("#pillXP").textContent = `${DB.xp} XP · Nivel ${lv.level}`;
+  const dateLabel=now.toLocaleDateString("es-ES",{weekday:"long",day:"numeric",month:"long"});
+  $("#todayLabel").textContent = dateLabel.charAt(0).toUpperCase()+dateLabel.slice(1);
+  const name = DB.name ? `, ${DB.name}` : "";
+  const hour=now.getHours();
+  const greet = hour<13 ? "Buenos días" : hour<20 ? "Buenas tardes" : "Buenas noches";
+  $("#greeting").textContent = `${greet}${name}.`;
+  const pending = DB.tasks.filter(t=>!t.done).length;
+  const doneToday = DB.tasks.filter(t=>t.done && t.completedAt===todayStr()).length;
+  $("#todaySummary").textContent = pending===0 ? "No tienes tareas pendientes. Puedes añadir nuevas cuando quieras." : `Tienes ${pending} tarea${pending!==1?"s":""} pendiente${pending!==1?"s":""} · ${doneToday} completada${doneToday!==1?"s":""}.`;
+  // theme
+  document.documentElement.setAttribute("data-theme", DB.theme||"light");
+  $("#themeBtn").innerHTML = appIcon(DB.theme==="dark" ? "sun" : "moon");
+  $("#themeBtn").setAttribute("aria-label", DB.theme==="dark" ? "Activar modo claro" : "Activar modo oscuro");
+  $("#themeBtn").setAttribute("aria-pressed",String(DB.theme==="dark"));
+  $("#themeSelect").value = DB.theme||"light";
+  $("#nameInput").value = DB.name||"";
+}
+function appIcon(name){
+  const paths={edit:'<path d="M4 20h4l11-11-4-4L4 16v4Z"/><path d="m13.5 6.5 4 4"/>',delete:'<path d="M4 7h16M9 7V4h6v3M6.5 7l1 13h9l1-13M10 11v5M14 11v5"/>',close:'<path d="M6 6l12 12M18 6 6 18"/>',sun:'<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5 19 19M19 5l-1.5 1.5M6.5 17.5 5 19"/>',moon:'<path d="M20 14a8.4 8.4 0 0 1-10-10 8.4 8.4 0 1 0 10 10Z"/>'};
+  return `<svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${paths[name]||''}</svg>`;
+}
+function taskHTML(task){
+  const sc = smartScore(task);
+  const doneCls = task.done?"done":"";
+  const prioCls = task.priority==="alta"?"alta":task.priority==="media"?"media":"baja";
+  const prioLabel = task.priority==="alta"?"Alta":task.priority==="media"?"Media":"Baja";
+  const energyLabel = task.energy==="alta"?"Alta energía":task.energy==="media"?"Media":"Ligera";
+  return `<div class="task ${doneCls}" data-id="${task.id}">
+    <button class="check ${task.done?"on":""}" data-action="toggle" aria-label="${task.done?"Reabrir tarea":"Completar tarea"}" aria-pressed="${task.done}">${task.done?"✓":""}</button>
+    <div style="flex:1; min-width:0;">
+      <div class="t-title">${esc(task.title)}</div>
+      ${task.notes?`<div class="small">${esc(task.notes)}</div>`:""}
+      ${(task.subtasks||[]).length?`<div class="subtask-list">${task.subtasks.map(sub=>`<label class="subtask"><input type="checkbox" data-subtask="${esc(sub.id)}" ${sub.done?"checked":""}><span class="${sub.done?"subdone":""}">${esc(sub.title)}</span></label>`).join("")}</div>`:""}
+      <div class="t-meta">
+        <span class="tag cat">${esc(task.category||"Personal")}</span>
+        ${task.project?`<span class="tag">${esc(task.project)}</span>`:""}
+        <span class="tag ${prioCls}">${prioLabel}</span>
+        <span class="tag">${energyLabel}</span>
+        <span class="tag">${task.duration||30} min</span>
+        ${task.scheduled?`<span class="tag schedule">Plan · ${fmtDate(task.scheduled)}</span>`:""}
+        ${task.due?`<span class="tag deadline">Límite · ${fmtDate(task.due)}</span>`:""}
+        ${task.repeat&&task.repeat!=="none"?`<span class="tag repeat-tag">${esc(repeatLabel(task.repeat))}</span>`:""}
+        ${!task.scheduled&&!task.due?`<span class="tag">Sin fecha</span>`:""}
+        ${!task.done?`<span class="tag score" title="Fecha límite + prioridad + energía + duración">${sc.score}/100</span>`:""}
+      </div>
+    </div>
+    <div class="t-actions">
+      <button class="mini-btn" data-action="edit" title="Editar" aria-label="Editar tarea">${appIcon("edit")}</button>
+      <button class="mini-btn" data-action="del" title="Borrar" aria-label="Borrar tarea">${appIcon("delete")}</button>
+    </div>
+  </div>`;
+}
+function renderHoy(){
+  const checkin=getTodayCheckin();
+  $("#overviewPending").textContent=DB.tasks.filter(x=>!x.done).length;
+  $("#overviewHabits").textContent=`${DB.habits.filter(h=>h.history[todayStr()]).length}/${DB.habits.length}`;
+  $("#overviewFocus").textContent=DB.focusSessions.filter(x=>x.date===todayStr()).reduce((sum,x)=>sum+x.minutes,0);
+  // energy UI
+  $$("#energyRow .energy-btn").forEach(b=>{const active=b.dataset.e===checkin.energy;b.classList.toggle("active",active);b.setAttribute("aria-pressed",String(active));});
+  $$("#moodRow .mood-btn").forEach(b=>{const active=b.dataset.m===checkin.mood;b.classList.toggle("active",active);b.setAttribute("aria-pressed",String(active));});
+  $("#timeAvail").value = checkin.timeAvailable;
+  $("#timeAvailLabel").textContent = checkin.timeAvailable+"h";
+  // plan
+  const plan=generatePlan();
+  const planEl=$("#aiPlan");
+  if(plan.items.length===0){
+    const future=DB.tasks.filter(t=>!t.done && ((t.scheduled&&t.scheduled>todayStr())||(t.due&&t.due>todayStr()))).length;
+    planEl.innerHTML=DB.tasks.some(t=>taskAvailableOnDay(t,todayStr())) ? `<p style="margin:0;">No hay tareas que quepan en el tiempo disponible. Aumenta la disponibilidad o ajusta la duración.</p>` : `<p style="margin:0;">${future?`Hoy no hay tareas programadas. Tienes ${future} tarea${future===1?"":"s"} en días próximos.`:"No tienes tareas programadas para hoy. Añade una para generar el plan."}</p>`;
+  } else {
+    planEl.innerHTML = plan.items.map(it=>{
+      if(it.break) return `<div class="plan-item"><div class="plan-time">${it.time}</div><div class="plan-break">${esc(it.label)}</div></div>`;
+      if(it.event){const e=it.event;return `<div class="plan-item"><div class="plan-time">${it.time}</div><div style="flex:1;"><b>${esc(e.title)}</b><div class="small">${e.time?`${esc(e.time)} · ${Number(e.duration||60)} min · compromiso`:"Compromiso de día completo"}</div></div></div>`;}
+      const t=it.task;
+      return `<div class="plan-item"><div class="plan-time">${it.time}</div><div style="flex:1;"><b>${esc(t.title)}</b><div class="small">${t.duration||30} min · ${esc(t.project||t.category||"Personal")} · ${t.priority==="alta"?"Alta":t.priority==="media"?"Media":"Baja"}${t.due?` · límite ${fmtDate(t.due)}`:""}</div></div></div>`;
+    }).join("") + `<p class="small" style="margin-top:12px;">${Math.round(plan.used/60*10)/10}h de tareas y pausas · ${plan.availMin/60}h disponibles. Los eventos con hora se reservan; revisa manualmente los de día completo.</p>`;
+  }
+  // progress ring
+  const total=DB.tasks.length, done=DB.tasks.filter(t=>t.done).length;
+  const pct = total? Math.round(done/total*100):0;
+  $("#ringTasksVal").textContent=pct+"%";
+  $("#ringTasks").style.strokeDashoffset = String(301.6*(1-pct/100));
+  $("#progressBar").style.width=pct+"%";
+  $("#progressText").textContent = total? `${done} de ${total} tareas completadas` : "Añade una tarea para empezar a medir el progreso.";
+  // top3
+  const top3 = sortedTasks(DB.tasks.filter(t=>taskAvailableOnDay(t,todayStr()))).slice(0,3);
+  $("#top3").innerHTML = top3.length? top3.map((t,i)=>`
+    <div style="display:flex; gap:10px; align-items:flex-start; padding:10px 0; border-bottom:1px dashed var(--line);">
+      <span class="priority-number">${String(i+1).padStart(2,"0")}</span>
+      <div style="flex:1;"><b>${esc(t.title)}</b><div class="small">${t.duration||30} min · ${t.due?`Límite ${fmtDate(t.due)}`:t.scheduled?`Plan ${fmtDate(t.scheduled)}`:"Sin fecha"} · ${smartScore(t).score}/100</div></div>
+    </div>`).join("") : `<p class="small">No hay tareas pendientes para priorizar.</p>`;
+  // insight
+  $("#insightBox").innerHTML = insightHTML();
+  // today tasks (due today or no due, pending first)
+  const t=todayStr();
+  let todayList = DB.tasks.filter(x=>taskAvailableOnDay(x,t));
+  todayList = sortedTasks(todayList);
+  $("#todayTasks").innerHTML = todayList.length? todayList.map(taskHTML).join("") : `<div class="card empty"><span class="empty-symbol">✓</span><b>Sin tareas para hoy</b><p class="small">Añade una tarea para incluirla en tu plan del día.</p><button class="empty-action" data-goto="tareas">Ver tareas →</button></div>`;
+  // habits today
+  $("#todayHabits").innerHTML = DB.habits.length? DB.habits.map(h=>{
+    const doneH = !!h.history[t];
+    return `<div class="habit">
+      <div class="h-icon">${habitMark(h.icon)}</div>
+      <div style="flex:1;"><b>${esc(h.name)}</b><div class="small">${streakForHabit(h)} días de racha · +${h.xp} XP</div></div>
+      <button class="btn small ${doneH?"primary":""}" data-habit-toggle="${h.id}">${doneH?"✓ Hecho":"Marcar"}</button>
+    </div>`;
+  }).join("") : `<div class="card empty"><span class="empty-symbol" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M19 4c-8 0-13 4-13 11a5 5 0 0 0 5 5c7 0 9-7 8-16Z"/><path d="M6 19c2-4 5-7 9-10"/></svg></span><b>Todavía no hay hábitos</b><p class="small">Crea uno para registrar el cumplimiento diario y su racha.</p><button class="empty-action" data-goto="habitos">Crear hábito →</button></div>`;
+}
+function insightHTML(){
+  const t=todayStr();
+  const checkin=getTodayCheckin();
+  const pending=DB.tasks.filter(x=>!x.done);
+  const overdue=pending.filter(x=>x.due && x.due<t);
+  const focusToday=DB.focusSessions.filter(s=>s.date===t).reduce((a,s)=>a+s.minutes,0);
+  let html="";
+  if(overdue.length>0) html+=`<div class="insight"><span class="ico">!</span><div><b>${overdue.length} tarea${overdue.length!==1?"s":""} vencida${overdue.length!==1?"s":""}</b><div class="small">Revisa «${esc(overdue[0].title)}» y ajusta la fecha si ha cambiado.</div></div></div>`;
+  if(checkin.energy==="baja") html+=`<div class="insight"><span class="ico">○</span><div><b>Día de energía baja</b><div class="small">Puedes empezar por una tarea breve o de baja intensidad.</div></div></div>`;
+  else if(checkin.energy==="alta") html+=`<div class="insight"><span class="ico">●</span><div><b>Día de energía alta</b><div class="small">Empieza por una tarea prioritaria que requiera concentración.</div></div></div>`;
+  if(focusToday>=50) html+=`<div class="insight"><span class="ico">◷</span><div><b>${focusToday} min de enfoque hoy</b><div class="small">Tiempo acumulado en sesiones de enfoque registradas.</div></div></div>`;
+  else if(focusToday===0 && pending.length>0) html+=`<div class="insight"><span class="ico">↗</span><div><b>Sin enfoque registrado hoy</b><div class="small">Inicia una sesión desde Enfoque si quieres registrar el tiempo dedicado.</div></div></div>`;
+  if(!html) html=`<div class="insight"><span class="ico">✓</span><div><b>Sin incidencias de planificación</b><div class="small">Consulta las tareas recomendadas cuando empieces a trabajar.</div></div></div>`;
+  return html;
+}
+let taskFilter="todas";
+function renderTareas(){
+  const q=($("#searchTasks").value||"").toLowerCase();
+  const sort=$("#sortTasks").value;
+  const t=todayStr();
+  let list=[...DB.tasks];
+  if(taskFilter==="hoy") list=list.filter(x=>taskAvailableOnDay(x,t));
+  else if(taskFilter==="vencidas") list=list.filter(x=>!x.done && x.due && x.due<t);
+  else if(taskFilter==="pendientes") list=list.filter(x=>!x.done);
+  else if(taskFilter==="semana") list=list.filter(x=>!x.done && [x.scheduled,x.due].some(d=>d&&d>=t&&d<=addDays(t,6)));
+  else if(taskFilter==="sinfecha") list=list.filter(x=>!x.done && !x.due && !x.scheduled);
+  else if(taskFilter==="alta") list=list.filter(x=>x.priority==="alta" && !x.done);
+  else if(taskFilter==="hechas") list=list.filter(x=>x.done);
+  const project=$("#projectFilter").value;
+  if(project==="__none__") list=list.filter(x=>!x.project);
+  else if(project) list=list.filter(x=>x.project===project);
+  if(q) list=list.filter(x=> (x.title+" "+(x.category||"")+" "+(x.project||"")+" "+(x.notes||"")+" "+(x.subtasks||[]).map(y=>y.title).join(" ")).toLowerCase().includes(q));
+  if(sort==="smart") list=sortedTasks(list);
+  else if(sort==="plan") list.sort((a,b)=>(plannedDate(a)||"9999").localeCompare(plannedDate(b)||"9999"));
+  else if(sort==="due") list.sort((a,b)=>(a.due||"9999").localeCompare(b.due||"9999"));
+  else if(sort==="priority"){ const w={alta:3,media:2,baja:1}; list.sort((a,b)=>w[b.priority]-w[a.priority]); }
+  else list.sort((a,b)=>b.createdAt-a.createdAt);
+  $("#allTasks").innerHTML = list.length? list.map(taskHTML).join("") : `<div class="card empty"><span class="big">○</span><b>No hay tareas aquí</b><p class="small">Crea una nueva o cambia el filtro.</p></div>`;
+}
+function weekDots(h){
+  const t=todayStr(); let out="";
+  for(let i=6;i>=0;i--){
+    const d=addDays(t,-i);
+    const on=!!h.history[d];
+    const isToday = d===t;
+    out+=`<span class="dot ${on?"on":""} ${isToday?"today":""}" title="${d}">${on?"✓":"·"}</span>`;
+  }
+  return out;
+}
+function renderHabitos(){
+  const t=todayStr();
+  $("#habitList").innerHTML = DB.habits.length? DB.habits.map(h=>{
+    const doneH=!!h.history[t];
+    return `<div class="habit">
+      <div class="h-icon">${habitMark(h.icon)}</div>
+      <div style="flex:1; min-width:0;">
+        <b>${esc(h.name)}</b>
+        <div class="small">Racha: ${streakForHabit(h)} días · +${h.xp} XP · Últimos 7 días:</div>
+        <div class="week-dots">${weekDots(h)}</div>
+      </div>
+      <div style="display:flex; flex-direction:column; gap:6px;">
+        <button class="btn small ${doneH?"primary":""}" data-habit-toggle="${h.id}">${doneH?"✓ Hecho hoy":"Marcar hoy"}</button>
+        <button class="btn small ghost" data-habit-del="${h.id}" style="color:var(--red);">Borrar</button>
+      </div>
+    </div>`;
+  }).join("") : `<div class="card empty"><b>Sin hábitos</b><p class="small">Crea un hábito para registrar el cumplimiento diario y consultar la racha.</p></div>`;
+}
+/* Focus */
+let timer = {total:25*60, left:25*60, running:false, int:null, mode:25, endAt:null, taskId:null};
+function fmtTimer(s){ return String(Math.floor(s/60)).padStart(2,"0")+":"+String(s%60).padStart(2,"0"); }
+function renderTimer(){
+  $("#timerText").textContent=fmtTimer(timer.left);
+  const pct = timer.total? timer.left/timer.total : 0;
+  $("#timerCircle").style.strokeDashoffset = String(678.6*(1-pct));
+  $("#timerLabel").textContent = timer.running? "En curso" : (timer.left===timer.total? "Listo para enfocar":"En pausa");
+  $("#timerStartBtn").textContent = timer.running? "En curso" : "Iniciar";
+}
+function renderEnfoque(){
+  const t=todayStr();
+  const mins=DB.focusSessions.filter(s=>s.date===t).reduce((a,s)=>a+s.minutes,0);
+  $("#focusTotal").textContent=`${mins} min hoy`;
+  const sel=$("#focusTaskSelect");
+  const pending=DB.tasks.filter(x=>!x.done);
+  const selected=sel.value;
+  sel.innerHTML = `<option value="">Enfoque libre (sin tarea)</option>` + pending.map(x=>`<option value="${x.id}">${esc(x.title)}</option>`).join("");
+  if(pending.some(x=>x.id===selected)) sel.value=selected;
+  const recent=[...DB.focusSessions].sort((a,b)=>b.createdAt-a.createdAt).slice(0,6);
+  $("#focusLog").innerHTML = recent.length? recent.map(s=>{
+    const task=DB.tasks.find(x=>x.id===s.taskId);
+    return `<div style="display:flex; justify-content:space-between; gap:10px; padding:10px 0; border-bottom:1px dashed var(--line);"><div><b>${task?esc(task.title):"Enfoque libre"}</b><div class="small">${fmtDate(s.date)}</div></div><span class="pill soft">${s.minutes} min</span></div>`;
+  }).join("") : `<p class="small">Las sesiones completadas aparecerán aquí.</p>`;
+  // ritual
+  const steps=[
+    {id:"r1", label:" Silencia notificaciones y deja el móvil boca abajo"},
+    {id:"r2", label:" Agua cerca y postura cómoda"},
+    {id:"r3", label:" Define una meta para esta sesión"},
+    {id:"r4", label:"Comprueba el temporizador y empieza la sesión"},
+  ];
+  $("#ritualList").innerHTML = steps.map(s=>`
+    <label style="display:flex; gap:10px; align-items:center; text-transform:none; letter-spacing:0; font-size:15px; font-weight:600; color:var(--ink); padding:10px 0; border-bottom:1px dashed var(--line); cursor:pointer;">
+      <input type="checkbox" data-ritual="${s.id}" ${DB.ritual[s.id]?"checked":""} style="width:24px; height:24px; min-height:24px; flex:0 0 auto;">
+      <span>${esc(s.label)}</span>
+    </label>`).join("");
+  renderTimer();
+}
+function renderMetas(){
+  const t=todayStr();
+  const days=[]; for(let i=6;i>=0;i--) days.push(addDays(t,-i));
+  const vals = days.map(d=>({
+    d,
+    focusMins:DB.focusSessions.filter(s=>s.date===d).reduce((a,s)=>a+s.minutes,0),
+    habitCount:DB.habits.filter(h=>h.history[d]).length,
+    taskDone:DB.tasks.filter(x=>x.done && x.completedAt===d).length
+  }));
+  const max=Math.max(10,...vals.map(x=>x.focusMins));
+  $("#weekChart").innerHTML = vals.map(x=>{
+    const h=Math.max(6, Math.round(x.focusMins/max*96));
+    const label=new Date(x.d+"T12:00:00").toLocaleDateString("es-ES",{weekday:"narrow"});
+    return `<div class="bar-col"><span class="bar-val">${x.focusMins}</span><div class="bar ${x.d===t?"today":""}" style="height:${h}px;"></div><span class="bar-label">${label}</span></div>`;
+  }).join("");
+  const taskTotal=vals.reduce((a,x)=>a+x.taskDone,0);
+  const focusTotal=vals.reduce((a,x)=>a+x.focusMins,0);
+  const habitTotal=vals.reduce((a,x)=>a+x.habitCount,0);
+  $("#weekSummary").textContent=`Últimos 7 días: ${taskTotal} tareas completadas · ${focusTotal} min de enfoque · ${habitTotal} registros de hábitos.`;
+  // patterns
+  $("#patterns").innerHTML = patternsHTML();
+  // goals
+  $("#goalList").innerHTML = DB.goals.length? DB.goals.map(g=>{
+    const pct=g.target? clamp(Math.round(g.current/g.target*100),0,100):0;
+    return `<div class="card" style="margin-bottom:12px;">
+      <div style="display:flex; justify-content:space-between; gap:10px; align-items:flex-start;">
+        <div><h3>${esc(g.title)}</h3><p class="small">${g.current} / ${g.target} ${esc(g.unit||"")} · ${pct}% ${g.due?`· hasta ${fmtDate(g.due)}`:""}</p></div>
+        <div style="display:flex; gap:6px;">
+          <button class="btn small" data-goal-minus="${g.id}" aria-label="Restar uno">−1</button>
+          <button class="btn small" data-goal-plus="${g.id}" aria-label="Sumar uno">+1</button>
+          <button class="btn small ghost" data-goal-del="${g.id}" style="color:var(--red);" aria-label="Eliminar meta">${appIcon("delete")}</button>
+        </div>
+      </div>
+      <div class="progress ${pct>=100?"green":""}" style="margin-top:10px;"><i style="width:${pct}%"></i></div>
+      ${pct>=100?`<p class="small" style="margin-top:6px;">Meta conseguida.</p>`:""}
+    </div>`;
+  }).join("") : `<div class="card empty"><b>Sin metas</b><p class="small">Define una meta y actualiza el progreso a medida que avances.</p></div>`;
+  const lv=levelFromXP(DB.xp);
+  $("#levelText").textContent=`Nivel ${lv.level} · ${DB.xp} XP totales`;
+  $("#levelBar").style.width=lv.pct+"%";
+  $("#levelNext").textContent=`Te faltan ${lv.nextMin-DB.xp} XP para el nivel ${lv.level+1}. Completa tareas (+10), hábitos (+5-15) y enfoque (+1/min).`;
+}
+function patternsHTML(){
+  const t=todayStr();
+  const byDay={}; // weekday -> focus mins
+  DB.focusSessions.forEach(s=>{ const wd=new Date(s.date+"T12:00:00").getDay(); byDay[wd]=(byDay[wd]||0)+s.minutes; });
+  let html="";
+  const entries=Object.entries(byDay).sort((a,b)=>b[1]-a[1]);
+  if(entries.length>=2){
+    const names=["domingo","lunes","martes","miércoles","jueves","viernes","sábado"];
+    html+=`<div class="insight"><div><b>Más tiempo registrado: ${names[entries[0][0]]}</b><div class="small">Has acumulado ${entries[0][1]} min de enfoque ese día de la semana; la cifra depende también de cuánto lo hayas usado.</div></div></div>`;
+    const worst=entries[entries.length-1];
+    html+=`<div class="insight"><div><b>Menos tiempo registrado: ${names[worst[0]]}</b><div class="small">Has acumulado ${worst[1]} min de enfoque ese día de la semana.</div></div></div>`;
+  }
+  const habitRate = DB.habits.length? Math.round(DB.habits.reduce((a,h)=>a+Object.keys(h.history).length,0)/DB.habits.length) : 0;
+  if(DB.habits.length) html+=`<div class="insight"><div><b>${habitRate} días registrados por hábito (media)</b><div class="small">Promedio de días cumplidos por hábito.</div></div></div>`;
+  const focusTotal=DB.focusSessions.reduce((a,s)=>a+s.minutes,0);
+  if(focusTotal>0) html+=`<div class="insight"><span class="ico">◷</span><div><b>${focusTotal} min de enfoque en total</b><div class="small">Tiempo acumulado en sesiones de enfoque registradas.</div></div></div>`;
+  if(!html) html=`<p class="small">Este resumen se basa en las sesiones de enfoque y hábitos que registres.</p>`;
+  return html;
+}
+function renderNotas(){
+  $("#noteList").innerHTML = DB.notes.length? [...DB.notes].sort((a,b)=>b.createdAt-a.createdAt).map(n=>`
+    <div class="note">
+      <div style="display:flex; justify-content:space-between; gap:10px;"><span class="small">${fmtDate(n.date)}</span><button class="mini-btn" data-note-del="${n.id}" aria-label="Eliminar nota">${appIcon("delete")}</button></div>
+      <p>${esc(n.text)}</p>
+    </div>`).join("") : `<div class="card empty"><b>Sin notas</b><p class="small">Captura ideas aquí. Puedes convertirlas en tareas con un toque.</p></div>`;
+}
+function formatEUR(value){return new Intl.NumberFormat("es-ES",{style:"currency",currency:"EUR"}).format(Number(value)||0);}
+function renderFinanzas(){
+  const monthInput=$("#financeMonth");if(!monthInput.value)monthInput.value=todayStr().slice(0,7);
+  const month=monthInput.value||todayStr().slice(0,7),records=DB.transactions.filter(x=>typeof x.date==="string"&&x.date.slice(0,7)===month).sort((a,b)=>b.date.localeCompare(a.date)||(b.createdAt||0)-(a.createdAt||0));
+  const incomes=records.filter(x=>x.type==="income"),expenses=records.filter(x=>x.type==="expense");
+  const income=incomes.reduce((sum,x)=>sum+x.amount,0),expense=expenses.reduce((sum,x)=>sum+x.amount,0),balance=income-expense;
+  $("#financeIncome").textContent=formatEUR(income);$("#financeExpense").textContent=formatEUR(expense);$("#financeBalance").textContent=formatEUR(balance);
+  $("#financeBalance").classList.toggle("negative",balance<0);$("#financeBalance").classList.toggle("positive",balance>=0);
+  $("#financeIncomeCount").textContent=`${incomes.length} movimiento${incomes.length===1?"":"s"}`;$("#financeExpenseCount").textContent=`${expenses.length} movimiento${expenses.length===1?"":"s"}`;
+  const cats={};expenses.forEach(x=>cats[x.category||"Otros"]=(cats[x.category||"Otros"]||0)+x.amount);const rows=Object.entries(cats).sort((a,b)=>b[1]-a[1]);const max=rows[0]?.[1]||0;
+  $("#financeCategories").innerHTML=rows.length?rows.map(([name,value])=>`<div class="finance-category"><span>${esc(name)}</span><div class="progress"><i style="width:${max?Math.round(value/max*100):0}%"></i></div><b>${formatEUR(value)}</b></div>`).join(""):`<div class="empty"><b>Sin gastos este mes</b><p class="small">Añade un movimiento para ver el resumen por categoría.</p></div>`;
+  $("#financeMovementCount").textContent=`${records.length} en total`;
+  $("#financeTransactions").innerHTML=records.length?records.map(x=>`<article class="transaction"><span class="transaction-mark ${x.type==='expense'?'expense':''}" aria-hidden="true">${x.type==='income'?'+':'−'}</span><div class="transaction-info"><b>${esc(x.title)}</b><small>${esc(x.category||"Otros")} · ${fmtDate(x.date)}${x.notes?` · ${esc(x.notes)}`:""}</small></div><b class="transaction-amount ${x.type==='expense'?'expense':''}">${x.type==='expense'?'−':'+'}${formatEUR(x.amount)}</b><div class="transaction-actions"><button class="mini-btn" data-transaction-edit="${esc(x.id)}" aria-label="Editar movimiento ${esc(x.title)}">${appIcon("edit")}</button><button class="mini-btn" data-transaction-delete="${esc(x.id)}" aria-label="Eliminar movimiento ${esc(x.title)}">${appIcon("delete")}</button></div></article>`).join(""):`<div class="card empty"><span class="empty-symbol">＋</span><b>Sin movimientos este mes</b><p class="small">Registra ingresos y gastos manualmente para ver cómo evoluciona tu balance.</p></div>`;
+}
+function openTransactionModal(item=null){
+  $("#transactionModalTitle").textContent=item?"Editar movimiento":"Nuevo movimiento";$("#transactionId").value=item?.id||"";$("#transactionType").value=item?.type||"expense";$("#transactionTitle").value=item?.title||"";$("#transactionAmount").value=item?.amount??"";$("#transactionCategory").value=item?.category||"Alimentación";$("#transactionDate").value=item?.date||todayStr();$("#transactionNotes").value=item?.notes||"";openModal("modalTransactionOverlay");focusModalField("modalTransactionOverlay","transactionTitle");
+}
+function renderProjectOptions(){
+  const names=[...DB.projects].sort((a,b)=>a.localeCompare(b,"es"));
+  $("#projectOptions").innerHTML=names.map(name=>`<option value="${esc(name)}"></option>`).join("");
+  const filter=$("#projectFilter"),value=filter.value;
+  filter.innerHTML='<option value="">Todos los proyectos</option>'+names.map(name=>`<option value="${esc(name)}">${esc(name)}</option>`).join("")+`<option value="__none__">Sin proyecto</option>`;
+  if(names.includes(value)||value==="__none__")filter.value=value;
+}
+function renderProyectos(){
+  const host=$("#projectList"),groups=[...DB.projects].sort((a,b)=>a.localeCompare(b,"es")).map(name=>({name,key:name,managed:true}));
+  if(DB.tasks.some(t=>!t.project))groups.push({name:"Sin proyecto",key:"__none__",managed:false});
+  if(!groups.length){host.innerHTML=`<div class="card empty"><span class="empty-symbol">＋</span><b>Aún no tienes proyectos</b><p class="small">Crea uno o escribe su nombre al añadir una tarea. FLUXO lo añadirá aquí automáticamente.</p><button class="empty-action" data-project-new>Crear proyecto →</button></div>`;return;}
+  host.innerHTML=`<div class="project-grid">${groups.map(({name,key,managed})=>{
+    const tasks=key==="__none__"?DB.tasks.filter(t=>!t.project):DB.tasks.filter(t=>t.project===name),pending=tasks.filter(t=>!t.done).length,done=tasks.length-pending,pct=tasks.length?Math.round(done/tasks.length*100):0;
+    const preview=sortedTasks(tasks.filter(t=>!t.done)).slice(0,3).map(t=>`<p><span class="muted">${t.due?`Límite ${fmtDate(t.due)}`:t.scheduled?`Plan ${fmtDate(t.scheduled)}`:"Sin fecha"}</span> · ${esc(t.title)}</p>`).join("")||`<p class="small">Sin tareas pendientes.</p>`;
+    const actions=managed?`<div class="project-actions"><button class="mini-btn" data-project-edit="${esc(name)}" aria-label="Renombrar proyecto ${esc(name)}" title="Renombrar">${appIcon("edit")}</button><button class="mini-btn" data-project-delete="${esc(name)}" aria-label="Eliminar proyecto ${esc(name)}" title="Eliminar">${appIcon("delete")}</button></div>`:"";
+    const buttonLabel=managed?"Ver tareas del proyecto →":"Asignar estas tareas a un proyecto →";
+    return `<article class="card project-card"><div class="project-card-head"><div><h3>${esc(name)}</h3><p class="small">${pending} pendiente${pending===1?"":"s"} · ${done} completada${done===1?"":"s"}</p></div>${actions}</div><div class="progress" aria-label="${pct}% completado"><i style="width:${pct}%"></i></div><div class="project-stats"><span class="tag">${tasks.length} tarea${tasks.length===1?"":"s"}</span><span class="tag score">${pct}% completado</span></div><div class="project-preview">${preview}</div><button class="text-link" data-project-open="${esc(key)}">${buttonLabel}</button></article>`;
+  }).join("")}</div>`;
+}
+function renderAll(){ renderHeader(); renderProjectOptions(); renderHoy(); renderTareas(); renderProyectos(); renderFinanzas(); renderHabitos(); renderEnfoque(); renderMetas(); renderNotas(); renderCalendar(); }
+
+/* ---------- Navegación ---------- */
+function switchView(name){
+  $$(".view").forEach(v=>v.classList.toggle("active", v.id==="view-"+name));
+  $$(".nav-btn").forEach(b=>{ const active=b.dataset.view===name; b.classList.toggle("active", active); if(active)b.setAttribute("aria-current","page"); else b.removeAttribute("aria-current"); });
+  window.scrollTo({top:0, behavior:"smooth"});
+  const settingsActive=name==="ajustes"; $("#settingsButton").classList.toggle("active",settingsActive); if(settingsActive) $("#settingsButton").setAttribute("aria-current","page"); else $("#settingsButton").removeAttribute("aria-current");
+  if(navigationBreakpoint.matches && document.body.classList.contains("drawer-open")) closeNavigation(true);
+  $("#currentLocation").textContent = ({hoy:"Hoy",tareas:"Tareas",proyectos:"Proyectos",finanzas:"Finanzas",calendario:"Calendario",habitos:"Hábitos",enfoque:"Enfoque",metas:"Metas",notas:"Notas",ajustes:"Ajustes"})[name] || "Hoy";
+  if(name==="metas") renderMetas();
+  if(name==="enfoque") renderEnfoque();
+}
+
+/* ---------- Modales ---------- */
+function openModal(id){ $("#"+id).classList.add("open"); }
+function closeModal(id){ $("#"+id).classList.remove("open"); }
+function focusModalField(overlayId,fieldId){
+  setTimeout(()=>{
+    const overlay=$("#"+overlayId),field=$("#"+fieldId);
+    if(overlay.classList.contains("open")&&!overlay.contains(document.activeElement))field.focus();
+  },80);
+}
+function segValue(segId){ const b=$("#"+segId+" button.active"); return b?b.dataset.v:"media"; }
+function segSet(segId, val){ $$("#"+segId+" button").forEach(b=>{const active=b.dataset.v===val;b.classList.toggle("active",active);b.setAttribute("aria-pressed",String(active));}); }
+function openProjectModal(name=""){$("#projectModalTitle").textContent=name?"Renombrar proyecto":"Nuevo proyecto";$("#projectOldName").value=name;$("#projectName").value=name;openModal("modalProjectOverlay");focusModalField("modalProjectOverlay","projectName");}
+$("#newProjectBtn").addEventListener("click",()=>openProjectModal());
+$("#newTransactionBtn").addEventListener("click",()=>openTransactionModal());
+$("#financeMonth").addEventListener("change",renderFinanzas);
+$("#saveTransactionBtn").addEventListener("click",()=>{
+  const title=$("#transactionTitle").value.trim(),amountRaw=Number($("#transactionAmount").value),date=$("#transactionDate").value,id=$("#transactionId").value;
+  if(!title){toast("Escribe el concepto del movimiento");return;}
+  if(!Number.isFinite(amountRaw)||amountRaw<0.01||amountRaw>1000000){toast("El importe debe estar entre 0,01 € y 1.000.000 €");return;}
+  const amount=Math.round((amountRaw+Number.EPSILON)*100)/100;
+  const validDate=value=>{if(!/^\d{4}-\d{2}-\d{2}$/.test(value))return false;const d=new Date(value+"T12:00:00");return !Number.isNaN(d.getTime())&&d.getFullYear()===Number(value.slice(0,4))&&d.getMonth()+1===Number(value.slice(5,7))&&d.getDate()===Number(value.slice(8,10));};
+  if(!validDate(date)){toast("Indica una fecha válida");return;}
+  const data={title,amount,date,type:$("#transactionType").value,category:$("#transactionCategory").value,notes:$("#transactionNotes").value.trim()};
+  if(id){const old=DB.transactions.find(x=>x.id===id);if(!old)return;Object.assign(old,data);}
+  else DB.transactions.push({id:uid(),...data,createdAt:Date.now()});
+  closeModal("modalTransactionOverlay");saveDB();renderAll();toast(id?"Movimiento actualizado":"Movimiento guardado");
+});
+$("#exportTransactionsBtn").addEventListener("click",()=>{
+  const month=$("#financeMonth").value||todayStr().slice(0,7),rows=DB.transactions.filter(x=>x.date?.slice(0,7)===month).sort((a,b)=>a.date.localeCompare(b.date));
+  const cell=v=>'"'+String(v??"").replace(/"/g,'""')+'"';
+  const lines=[["Fecha","Tipo","Concepto","Categoría","Importe EUR","Notas"],...rows.map(x=>[x.date,x.type==="income"?"Ingreso":"Gasto",x.title,x.category||"Otros",Number(x.amount).toFixed(2).replace(".",","),x.notes||""])];
+  const blob=new Blob(["\ufeff"+lines.map(row=>row.map(cell).join(";")).join("\r\n")],{type:"text/csv;charset=utf-8"}),url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download=`fluxo-finanzas-${month}.csv`;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);toast("Resumen mensual exportado en CSV");
+});
+$("#saveProjectBtn").addEventListener("click",()=>{
+  const old=$("#projectOldName").value,name=$("#projectName").value.trim();
+  if(!name){toast("Escribe un nombre para el proyecto");return;}
+  if(name.length>80){toast("El nombre puede tener hasta 80 caracteres");return;}
+  if(DB.projects.some(x=>x.toLocaleLowerCase()===name.toLocaleLowerCase()&&x!==old)){toast("Ya existe un proyecto con ese nombre");return;}
+  if(old){const i=DB.projects.indexOf(old);if(i>=0)DB.projects[i]=name;DB.tasks.forEach(t=>{if(t.project===old)t.project=name;});}
+  else DB.projects.push(name);
+  closeModal("modalProjectOverlay");saveDB();renderAll();toast(old?"Proyecto renombrado":"Proyecto creado");
+});
+function openTaskModal(task=null){
+  $("#modalTaskTitle").textContent = task? "Editar tarea":"Nueva tarea";
+  $("#taskId").value = task?task.id:"";
+  $("#taskTitle").value = task?task.title:"";
+  $("#taskCategory").value = task?(task.category||"Personal"):"Personal";
+  $("#taskProject").value = task?(task.project||""):"";
+  $("#taskScheduled").value = task?(task.scheduled||""):"";
+  $("#taskDue").value = task?(task.due||""):"";
+  $("#taskRepeat").value = task?(task.repeat||"none"):"none";
+  $("#taskRepeatEnd").value = task?(task.repeatEnd||""):"";
+  $("#taskRepeatEndWrap").hidden=$("#taskRepeat").value==="none";
+  $("#repeatHelp").hidden=$("#taskRepeat").value==="none";
+  $("#taskDuration").value = task?(task.duration||30):30;
+  $("#taskNotes").value = task?(task.notes||""):"";
+  $("#taskSubtasks").value = (task?.subtasks || []).map(x=>x.title).join("\n");
+  segSet("taskPrioritySeg", task?task.priority:"media");
+  segSet("taskEnergySeg", task?task.energy:"media");
+  openModal("modalTaskOverlay");
+  focusModalField("modalTaskOverlay","taskTitle");
+}
+
+function setTaskDone(task,done){
+  task.done=done;task.completedAt=done?todayStr():null;
+  if(done){
+    addXP(10);
+    if(task.repeat&&task.repeat!=="none"){
+      task.seriesId=task.seriesId||uid();
+      const base=task.scheduled||task.due||todayStr(),next=nextRepeatDate(base,task.repeat);
+      if(!task.repeatEnd||next<=task.repeatEnd){
+        const duplicate=DB.tasks.some(x=>x.id!==task.id&&x.seriesId===task.seriesId&&!x.done&&(x.scheduled||x.due)===next);
+        if(!duplicate){
+          const nextTask={...task,id:uid(),done:false,completedAt:null,createdAt:Date.now(),previousOccurrenceId:task.id,subtasks:(task.subtasks||[]).map(x=>({...x,id:uid(),done:false}))};
+          if(task.scheduled)nextTask.scheduled=next;
+          else if(task.due)nextTask.due=next;
+          else nextTask.scheduled=next;
+          if(task.scheduled&&task.due)nextTask.due=nextRepeatDate(task.due,task.repeat);
+          DB.tasks.push(nextTask);
+        }
+      }
+    }
+  }else{
+    const child=DB.tasks.find(x=>x.previousOccurrenceId===task.id&&!x.done);
+    if(child)DB.tasks=DB.tasks.filter(x=>x.id!==child.id);
+    DB.xp=Math.max(0,DB.xp-10);
+  }
+  saveDB();renderAll();toast(done?"Tarea completada · +10 XP":"Tarea reabierta · −10 XP");
+}
+/* ---------- Eventos ---------- */
+document.addEventListener("click", (e)=>{
+  const nav=e.target.closest(".nav-btn"); if(nav){ switchView(nav.dataset.view); return; }
+  const projectNew=e.target.closest("[data-project-new]");if(projectNew){openProjectModal();return;}
+  const projectOpen=e.target.closest("[data-project-open]");if(projectOpen){taskFilter="todas";$$("#taskFilters .filter").forEach(b=>{const active=b.dataset.f==="todas";b.classList.toggle("active",active);b.setAttribute("aria-pressed",String(active));});$("#searchTasks").value="";renderProjectOptions();$("#projectFilter").value=projectOpen.dataset.projectOpen;renderTareas();switchView("tareas");return;}
+  const projectEdit=e.target.closest("[data-project-edit]");if(projectEdit){openProjectModal(projectEdit.dataset.projectEdit);return;}
+  const projectDelete=e.target.closest("[data-project-delete]");if(projectDelete){const name=projectDelete.dataset.projectDelete;if(confirm(`¿Eliminar el proyecto “${name}”? Las tareas se conservarán sin proyecto.`)){DB.projects=DB.projects.filter(x=>x!==name);DB.tasks.forEach(t=>{if(t.project===name)t.project="";});saveDB();renderAll();toast("Proyecto eliminado; las tareas se conservaron");}return;}
+  const transactionEdit=e.target.closest("[data-transaction-edit]");if(transactionEdit){const item=DB.transactions.find(x=>x.id===transactionEdit.dataset.transactionEdit);if(item)openTransactionModal(item);return;}
+  const transactionDelete=e.target.closest("[data-transaction-delete]");if(transactionDelete){const item=DB.transactions.find(x=>x.id===transactionDelete.dataset.transactionDelete);if(item&&confirm(`¿Eliminar el movimiento “${item.title}”?`)){DB.transactions=DB.transactions.filter(x=>x.id!==item.id);saveDB();renderAll();toast("Movimiento eliminado");}return;}
+  const goto=e.target.closest("[data-goto]"); if(goto){ switchView(goto.dataset.goto); return; }
+  const close=e.target.closest("[data-close]"); if(close){ closeModal(close.dataset.close); return; }
+  // task actions
+  const actBtn=e.target.closest("[data-action]");
+  if(actBtn){
+    const card=actBtn.closest(".task"); const id=card?.dataset.id;
+    const task=DB.tasks.find(x=>x.id===id); if(!task) return;
+    if(actBtn.dataset.action==="toggle"){
+      setTaskDone(task,!task.done);
+    } else if(actBtn.dataset.action==="del"){
+      if(confirm("¿Borrar esta tarea?")){ DB.tasks=DB.tasks.filter(x=>x.id!==id); saveDB(); renderAll(); toast(" Tarea borrada"); }
+    } else if(actBtn.dataset.action==="edit"){ openTaskModal(task); }
+    return;
+  }
+  const habitToggle=e.target.closest("[data-habit-toggle]");
+  if(habitToggle){
+    const h=DB.habits.find(x=>x.id===habitToggle.dataset.habitToggle); if(!h) return;
+    const t=todayStr();
+    if(h.history[t]){ delete h.history[t]; DB.xp=Math.max(0,DB.xp-(h.xp||10)); toast("Hábito desmarcado · XP ajustados"); }
+    else { h.history[t]=true; addXP(h.xp||10); toast(` ¡Hábito cumplido! +${h.xp||10} XP`); }
+    saveDB(); renderAll(); return;
+  }
+  const habitDel=e.target.closest("[data-habit-del]");
+  if(habitDel){ if(confirm("¿Borrar este hábito?")){ DB.habits=DB.habits.filter(x=>x.id!==habitDel.dataset.habitDel); saveDB(); renderAll(); } return; }
+  const goalMinus=e.target.closest("[data-goal-minus]");
+  if(goalMinus){ const g=DB.goals.find(x=>x.id===goalMinus.dataset.goalMinus); if(!g || g.current<=0) return; const wasDone=g.current>=g.target; g.current--; if(wasDone && g.current<g.target) DB.xp=Math.max(0,DB.xp-20); saveDB(); renderAll(); toast("Progreso actualizado"); return; }
+  const goalPlus=e.target.closest("[data-goal-plus]");
+  if(goalPlus){
+    const g=DB.goals.find(x=>x.id===goalPlus.dataset.goalPlus); if(!g) return;
+    const wasDone=g.current>=g.target;
+    if(wasDone){ toast("Ya has alcanzado esta meta"); return; }
+    g.current++;
+    if(!wasDone && g.current>=g.target){ addXP(20); toast(" ¡Meta conseguida! +20 XP"); }
+    else toast(" Progreso +1");
+    saveDB(); renderAll(); return;
+  }
+  const goalDel=e.target.closest("[data-goal-del]");
+  if(goalDel){ if(confirm("¿Borrar esta meta?")){ DB.goals=DB.goals.filter(x=>x.id!==goalDel.dataset.goalDel); saveDB(); renderAll(); } return; }
+  const noteDel=e.target.closest("[data-note-del]");
+  if(noteDel){ if(confirm("¿Borrar esta nota?")){ DB.notes=DB.notes.filter(x=>x.id!==noteDel.dataset.noteDel); saveDB(); renderAll(); toast("Nota eliminada"); } return; }
+  // seg buttons
+  const segBtn=e.target.closest(".seg button");
+  if(segBtn){ const seg=segBtn.closest(".seg"); $$("button",seg).forEach(b=>{const active=b===segBtn;b.classList.toggle("active",active);b.setAttribute("aria-pressed",String(active));}); return; }
+  const energyBtn=e.target.closest(".energy-btn");
+  if(energyBtn){ $$("#energyRow .energy-btn").forEach(b=>{const active=b===energyBtn;b.classList.toggle("active",active);b.setAttribute("aria-pressed",String(active));}); return; }
+  const moodBtn=e.target.closest(".mood-btn");
+  if(moodBtn && moodBtn.closest("#moodRow")){ $$("#moodRow .mood-btn").forEach(b=>{const active=b===moodBtn;b.classList.toggle("active",active);b.setAttribute("aria-pressed",String(active));}); return; }
+  const habitIcon=e.target.closest("#habitIconRow .mood-btn");
+  if(habitIcon){ $$("#habitIconRow .mood-btn").forEach(b=>{const active=b===habitIcon;b.classList.toggle("active",active);b.setAttribute("aria-pressed",String(active));}); return; }
+  const modeBtn=e.target.closest(".mode-btn");
+  if(modeBtn){ stopTimer(false); $$("#modeRow .mode-btn").forEach(b=>{const active=b===modeBtn;b.classList.toggle("active",active);b.setAttribute("aria-pressed",String(active));}); timer.mode=parseInt(modeBtn.dataset.min,10); timer.total=timer.mode*60; timer.left=timer.total; renderTimer(); return; }
+  const filterBtn=e.target.closest(".filter");
+  if(filterBtn){ $$("#taskFilters .filter").forEach(b=>{const active=b===filterBtn;b.classList.toggle("active",active);b.setAttribute("aria-pressed",String(active));}); taskFilter=filterBtn.dataset.f; renderTareas(); return; }
+});
+document.addEventListener("change", (e)=>{
+  if(e.target.matches("[data-subtask]")){ const task=DB.tasks.find(x=>x.id===e.target.closest(".task")?.dataset.id); const sub=task?.subtasks?.find(x=>x.id===e.target.dataset.subtask); if(sub){ sub.done=e.target.checked; saveDB(); renderAll(); } }
+  if(e.target.matches("[data-ritual]")){ DB.ritual[e.target.dataset.ritual]=e.target.checked; saveDB(); }
+  if(e.target.id==="themeSelect"){
+    const profileName=$("#nameInput").value;
+    DB.theme=e.target.value; saveDB(); renderHeader();
+    $("#nameInput").value=profileName;
+  }
+  if(e.target.id==="sortTasks"||e.target.id==="searchTasks"||e.target.id==="projectFilter") renderTareas();
+});
+document.addEventListener("input", (e)=>{
+  if(e.target.id==="searchTasks") renderTareas();
+  if(e.target.id==="timeAvail"){ $("#timeAvailLabel").textContent=e.target.value+"h"; }
+  if(e.target.id==="quickInput"){
+    const v=e.target.value.trim();
+    if(v.length>3){ const p=parseNatural(v); $("#quickPreview").innerHTML=` Entendido: <b>${esc(p.title)}</b> · ${p.priority==="alta"?"Alta":p.priority==="media"?"Media":"Baja"} · ${p.duration} min · ${p.scheduled?`plan ${fmtDate(p.scheduled)}`:"sin fecha"}${p.repeat!=="none"?` · ${repeatLabel(p.repeat)}`:""} · ${esc(p.category)}`; }
+    else $("#quickPreview").textContent="";
+  }
+});
+document.addEventListener("keydown", (e)=>{
+  if(e.key==="Enter" && e.target.id==="quickInput"){ e.preventDefault(); $("#quickAddBtn").click(); }
+  if(e.key==="Escape"){ $$(".modal-overlay").forEach(m=>m.classList.remove("open")); }
+});
+$$(".modal-overlay").forEach(ov=>ov.addEventListener("click", (e)=>{ if(e.target===ov) ov.classList.remove("open"); }));
+
+/* Botones principales */
+$("#saveEnergyBtn").addEventListener("click", ()=>{
+  const energy=$("#energyRow .energy-btn.active")?.dataset.e||"media";
+  const mood=$("#moodRow .mood-btn.active")?.dataset.m||"\u{1F642}";
+  const timeAvailable=parseFloat($("#timeAvail").value||"4");
+  DB.checkins[todayStr()]={energy, mood, timeAvailable};
+  saveDB(); renderAll(); toast(" Energía guardada. Plan actualizado ");
+});
+$("#regenPlanBtn").addEventListener("click", ()=>{ renderHoy(); toast(" Plan regenerado"); });
+$("#goFocusBtn").addEventListener("click", ()=>switchView("enfoque"));
+$("#quickAddBtn").addEventListener("click", ()=>{
+  const v=$("#quickInput").value.trim(); if(!v){ toast("Escribe algo primero "); return; }
+  const p=parseNatural(v);
+  const task={id:uid(), title:p.title, category:p.category, priority:p.priority, energy:p.energy, duration:p.duration, due:p.due, scheduled:p.scheduled, repeat:p.repeat, done:false, notes:"", createdAt:Date.now()};
+  if(task.repeat!=="none" && !task.scheduled && !task.due)task.scheduled=todayStr();
+  DB.tasks.push(task);
+  $("#quickInput").value=""; $("#quickPreview").textContent="";
+  saveDB(); renderAll(); toast(" Tarea creada con captura rápida");
+});
+$("#taskRepeat").addEventListener("change",()=>{const recurring=$("#taskRepeat").value!=="none";$("#taskRepeatEndWrap").hidden=!recurring;$("#repeatHelp").hidden=!recurring;});
+$("#newTaskBtn").addEventListener("click", ()=>openTaskModal());
+$("#dashboardNewTask").addEventListener("click", ()=>openTaskModal());
+$("#saveTaskBtn").addEventListener("click", ()=>{
+  const title=$("#taskTitle").value.trim(); if(!title){ toast("Pon un título "); return; }
+  const id=$("#taskId").value;
+  const duration=Number($("#taskDuration").value); if(!Number.isInteger(duration)||duration<5||duration>480){toast("La duración debe estar entre 5 y 480 minutos");return;}
+  const repeat=$("#taskRepeat").value;let project=$("#taskProject").value.trim();
+  if(project.length>80){toast("El nombre del proyecto puede tener hasta 80 caracteres");return;}
+  if(project){const match=DB.projects.find(x=>x.toLocaleLowerCase()===project.toLocaleLowerCase());if(match)project=match;}
+  const scheduled=$("#taskScheduled").value||"",due=$("#taskDue").value||"",repeatEnd=$("#taskRepeatEnd").value||"";
+  const validDate=value=>{if(!value)return true;if(!/^\d{4}-\d{2}-\d{2}$/.test(value))return false;const d=new Date(value+"T12:00:00");return !Number.isNaN(d.getTime())&&d.getFullYear()===Number(value.slice(0,4))&&d.getMonth()+1===Number(value.slice(5,7))&&d.getDate()===Number(value.slice(8,10));};
+  if(!validDate(scheduled)||!validDate(due)||!validDate(repeatEnd)){toast("Revisa las fechas de la tarea");return;}
+  if(repeatEnd && repeat!=="none" && (scheduled||due) && repeatEnd<(scheduled||due)){toast("La fecha final de repetición debe ser posterior al inicio");return;}
+  const data={title, category:$("#taskCategory").value, project, scheduled, due, repeat, repeatEnd:repeat==="none"?"":repeatEnd, priority:segValue("taskPrioritySeg"), energy:segValue("taskEnergySeg"), duration, notes:$("#taskNotes").value.trim()};
+  if(data.repeat!=="none"&&!data.scheduled&&!data.due)data.scheduled=todayStr();
+  const existing=(DB.tasks.find(x=>x.id===id)?.subtasks || []).slice();
+  data.subtasks=$("#taskSubtasks").value.split("\n").map(x=>x.trim()).filter(Boolean).map(title=>{ const idx=existing.findIndex(x=>x.title===title); return idx<0?{id:uid(),title,done:false}:existing.splice(idx,1)[0]; });
+  if(id){ const t=DB.tasks.find(x=>x.id===id); Object.assign(t,data); if(!t.seriesId&&t.repeat!=="none")t.seriesId=uid(); toast("Tarea actualizada"); }
+  else { const created={id:uid(), ...data, done:false, createdAt:Date.now()}; if(created.repeat!=="none")created.seriesId=uid(); DB.tasks.push(created); toast("Tarea creada"); }
+  if(project&&!DB.projects.some(x=>x.toLocaleLowerCase()===project.toLocaleLowerCase()))DB.projects.push(project);
+  closeModal("modalTaskOverlay"); saveDB(); renderAll();
+});
+$("#newHabitBtn").addEventListener("click", ()=>openModal("modalHabitOverlay"));
+$("#saveHabitBtn").addEventListener("click", ()=>{
+  const name=$("#habitName").value.trim(); if(!name){ toast("Pon un nombre "); return; }
+  const icon=$("#habitIconRow .mood-btn.active")?.dataset.i||"general";
+  DB.habits.push({id:uid(), name, icon, xp:parseInt($("#habitXP").value,10), history:{}});
+  $("#habitName").value=""; closeModal("modalHabitOverlay"); saveDB(); renderAll(); toast(" Hábito creado");
+});
+$("#newGoalBtn").addEventListener("click", ()=>openModal("modalGoalOverlay"));
+$("#saveGoalBtn").addEventListener("click", ()=>{
+  const title=$("#goalTitle").value.trim(); if(!title){ toast("Pon un título "); return; }
+  DB.goals.push({id:uid(), title, target:clamp(parseInt($("#goalTarget").value||"10",10),1,100000), current:0, unit:$("#goalUnit").value.trim()||"unidades", due:$("#goalDue").value||""});
+  $("#goalTitle").value=""; closeModal("modalGoalOverlay"); saveDB(); renderAll(); toast(" Meta creada");
+});
+$("#saveNoteBtn").addEventListener("click", ()=>{
+  const text=$("#noteInput").value.trim(); if(!text){ toast("Escribe una nota "); return; }
+  DB.notes.push({id:uid(), text, date:todayStr(), createdAt:Date.now()});
+  $("#noteInput").value=""; saveDB(); renderAll(); toast(" Nota guardada");
+});
+$("#noteToTaskBtn").addEventListener("click", ()=>{
+  const text=$("#noteInput").value.trim(); if(!text){ toast("Escribe primero la idea "); return; }
+  const p=parseNatural(text);
+  DB.tasks.push({id:uid(), title:p.title, category:p.category, priority:p.priority, energy:p.energy, duration:p.duration, due:p.due, scheduled:p.scheduled||todayStr(), repeat:p.repeat, done:false, notes:text, createdAt:Date.now()});
+  $("#noteInput").value=""; saveDB(); renderAll(); toast(" Convertida en tarea");
+});
+/* Timer */
+function stopTimer(reset=true){ if(timer.running && timer.endAt) timer.left=Math.max(0,Math.ceil((timer.endAt-Date.now())/1000)); timer.running=false; timer.endAt=null; clearInterval(timer.int); if(reset){ timer.left=timer.total; } renderTimer(); }
+$("#timerStartBtn").addEventListener("click", ()=>{
+  if(timer.running) return;
+  timer.running=true; timer.endAt=Date.now()+timer.left*1000; timer.taskId=$("#focusTaskSelect").value||null; renderTimer();
+  timer.int=setInterval(()=>{
+    timer.left=Math.max(0,Math.ceil((timer.endAt-Date.now())/1000));
+    if(timer.left<=0){
+      clearInterval(timer.int); timer.running=false;
+      const mins=timer.mode;
+      DB.focusSessions.push({id:uid(), taskId:timer.taskId, minutes:mins, date:todayStr(), createdAt:Date.now()});
+      addXP(mins); saveDB(); renderAll();
+      toast(` ¡Sesión completada! +${mins} XP`);
+      try{ navigator.vibrate && navigator.vibrate([200,100,200]); }catch(e){}
+      timer.left=timer.total; renderTimer();
+    } else renderTimer();
+  },1000);
+});
+$("#timerPauseBtn").addEventListener("click", ()=>{ stopTimer(false); toast(" En pausa"); });
+$("#timerResetBtn").addEventListener("click", ()=>{ stopTimer(true); });
+/* Perfil / datos */
+$("#themeBtn").addEventListener("click", ()=>{ DB.theme = DB.theme==="dark"?"light":"dark"; saveDB(); renderHeader(); });
+$("#saveProfileBtn").addEventListener("click", ()=>{ DB.name=$("#nameInput").value.trim(); DB.theme=$("#themeSelect").value; saveDB(); renderHeader(); toast(" Perfil guardado"); });
+$("#exportBtn").addEventListener("click", ()=>{
+  const blob=new Blob([JSON.stringify(DB,null,2)],{type:"application/json"});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement("a"); a.href=url; a.download="fluxo-copia-"+todayStr()+".json"; a.click();
+  setTimeout(()=>URL.revokeObjectURL(url),1000);
+  toast(" Copia exportada");
+});
+$("#importBtn").addEventListener("click", ()=>$("#importFile").click());
+function validateBackup(data){
+  if(!data || typeof data!=="object" || Array.isArray(data)) throw Error("Formato inválido");
+  const keys=["tasks","habits","goals","notes","focusSessions"];
+  if(keys.some(k=>!Array.isArray(data[k])) || (data.events!==undefined&&!Array.isArray(data.events)) || (data.transactions!==undefined&&!Array.isArray(data.transactions))) throw Error("Listas inválidas");
+  const object=x=>x && typeof x==="object" && !Array.isArray(x);
+  const id=x=>object(x) && typeof x.id==="string" && /^[a-zA-Z0-9_-]{1,128}$/.test(x.id);
+  const text=x=>typeof x==="string";
+  const date=x=>{ if(x==null||x==="") return true; if(!text(x)||!/^\d{4}-\d{2}-\d{2}$/.test(x)) return false; const d=new Date(x+"T12:00:00"); return !Number.isNaN(d.getTime()) && d.getFullYear()===Number(x.slice(0,4)) && d.getMonth()+1===Number(x.slice(5,7)) && d.getDate()===Number(x.slice(8,10)); };
+  const choice=(value,options)=>options.includes(value);
+  if(data.tasks.some(t=>!id(t)||!text(t.title)||!date(t.due)||!date(t.scheduled)||!date(t.repeatEnd)
+    ||(t.project!==undefined&&!text(t.project))
+    ||(t.category!==undefined&&!text(t.category))
+    ||(t.notes!==undefined&&!text(t.notes))
+    ||(t.repeat!==undefined&&!choice(t.repeat,['none','daily','weekdays','weekly','monthly']))
+    ||(t.priority!==undefined&&!choice(t.priority,['baja','media','alta']))
+    ||(t.energy!==undefined&&!choice(t.energy,['baja','media','alta']))
+    ||(t.done!==undefined&&typeof t.done!=="boolean")
+    ||(t.duration!==undefined&&(!Number.isInteger(t.duration)||t.duration<5||t.duration>480))
+    ||(t.subtasks!==undefined&&(!Array.isArray(t.subtasks)||t.subtasks.some(x=>!id(x)||!text(x.title)||(x.done!==undefined&&typeof x.done!=="boolean")))))) throw Error("Tareas inválidas");
+  if(data.projects!==undefined&&(!Array.isArray(data.projects)||data.projects.some(x=>!text(x)||x.trim().length>80))) throw Error("Proyectos inválidos");
+  if(data.habits.some(h=>!id(h)||!text(h.name)||!object(h.history)
+    ||(h.icon!==undefined&&!text(h.icon))
+    ||(h.xp!==undefined&&(!Number.isFinite(h.xp)||h.xp<0||h.xp>100))
+    ||Object.values(h.history).some(value=>typeof value!=="boolean"))) throw Error("Hábitos inválidos");
+  if(data.goals.some(g=>!id(g)||!text(g.title)||!Number.isFinite(g.target)||g.target<1||g.target>100000
+    ||!Number.isFinite(g.current)||g.current<0||!date(g.due)||(g.unit!==undefined&&!text(g.unit)))) throw Error("Metas inválidas");
+  if(data.notes.some(n=>!id(n)||!text(n.text)||!date(n.date))) throw Error("Notas inválidas");
+  if(data.focusSessions.some(f=>!id(f)||!date(f.date)||!Number.isFinite(f.minutes)||f.minutes<=0||f.minutes>1440)) throw Error("Sesiones inválidas");
+  if((data.transactions||[]).some(t=>!id(t)||!text(t.title)||!Number.isFinite(t.amount)||t.amount<0.01||t.amount>1000000
+    ||Number(t.amount.toFixed(2))!==t.amount||!choice(t.type,['expense','income'])||!t.date||!date(t.date)
+    ||(t.category!==undefined&&!text(t.category))||(t.notes!==undefined&&!text(t.notes)))) throw Error("Movimientos financieros inválidos");
+  if((data.events||[]).some(ev=>!id(ev)||!text(ev.title)||!ev.date||!date(ev.date)
+    ||(ev.time!==undefined&&ev.time!==""&&(!text(ev.time)||!/^([01]\d|2[0-3]):[0-5]\d$/.test(ev.time)))
+    ||(ev.duration!==undefined&&(!Number.isInteger(ev.duration)||ev.duration<5||ev.duration>1440))
+    ||(ev.notes!==undefined&&!text(ev.notes)))) throw Error("Eventos inválidos");
+  const checkinInvalid=Object.entries(object(data.checkins)?data.checkins:{}).some(([day,c])=>!date(day)||!object(c)
+    ||!choice(c.energy,['baja','media','alta'])||!text(c.mood)||!Number.isFinite(c.timeAvailable)
+    ||c.timeAvailable<1||c.timeAvailable>12||!Number.isInteger(c.timeAvailable*2));
+  if(!object(data.checkins)||!object(data.ritual)||Object.values(data.ritual).some(value=>typeof value!=="boolean")
+    ||checkinInvalid||(data.name!==undefined&&!text(data.name))||(data.theme!==undefined&&!choice(data.theme,['light','dark']))
+    ||(data.xp!==undefined&&(!Number.isFinite(data.xp)||data.xp<0))) throw Error("Ajustes inválidos");
+  const merged=Object.assign(defaultDB(),data,{events:data.events||[],projects:data.projects||[],transactions:data.transactions||[]});
+  merged.tasks.forEach(t=>{if(typeof t.project==="string")t.project=t.project.trim();});
+  merged.projects=[...new Set([...merged.projects,...merged.tasks.map(t=>t.project).filter(x=>typeof x==="string"&&x.trim())].map(x=>x.trim()).filter(Boolean))];
+  return merged;
+}
+$("#importFile").addEventListener("change", (e)=>{
+  const file=e.target.files[0]; e.target.value=""; if(!file) return;
+  const reader=new FileReader();
+  reader.onerror=()=>toast("No se pudo leer la copia");
+  reader.onload=()=>{ try{
+    const candidate=validateBackup(JSON.parse(reader.result));
+    if(!confirm("Importar sustituirá todos los datos actuales. ¿Continuar?")) return;
+    const previous=DB; DB=candidate;
+    try {renderAll(); if(!saveDB()){DB=previous;renderAll();toast("No se pudo guardar la copia importada");return;}} catch(error){DB=previous;renderAll();throw error;}
+    toast("Datos importados");
+  }catch(err){console.error(err);toast("Copia no válida. Tus datos no se han modificado.");} };
+  reader.readAsText(file);
+});
+$("#printBtn").addEventListener("click", ()=>window.print());
+$("#seedBtn").addEventListener("click", ()=>{ seedExample(true); saveDB(); renderAll(); });
+$("#resetBtn").addEventListener("click", ()=>{ if(confirm("¿Borrar TODOS tus datos? Esta acción no se puede deshacer.")){ DB=defaultDB(); saveDB(); renderAll(); toast(" Todo borrado. Empieza de cero "); } });
+/* Install banner iPad */
+(function(){
+  try{
+    const standalone = window.navigator.standalone===true;
+    const isAppleMobile = /iPhone|iPad|iPod/i.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+    const dismissed = localStorage.getItem("fluxo_install_dismissed")==="1";
+    if(!standalone && isAppleMobile && !dismissed) $("#installBanner").classList.add("show");
+  }catch(e){}
+  $("#dismissInstall").addEventListener("click", ()=>{ $("#installBanner").classList.remove("show"); try{ localStorage.setItem("fluxo_install_dismissed","1"); }catch(e){} });
+})();
+/* Calendar: local dates, deadlines and events. */
+let calendarSelected=todayStr();
+let calendarMonth=calendarSelected.slice(0,7);
+function habitMark(icon){
+  const old=icon?.codePointAt(0);
+  const legacy={128167:'agua',128218:'lectura',129496:'bienestar',127939:'movimiento',127911:'bienestar',128170:'movimiento',127793:'general'};
+  const names={general:'GE',lectura:'LE',agua:'AG',movimiento:'MO',bienestar:'BI',diario:'DI'};
+  return names[legacy[old] || icon] || 'GE';
+}
+function renderCalendar(){
+  const [year,month]=calendarMonth.split('-').map(Number);
+  const first=calendarMonth+'-01';
+  const offset=(new Date(year,month-1,1).getDay()+6)%7;
+  const start=addDays(first,-offset);
+  const monthLabel=new Date(year,month-1,1).toLocaleDateString('es-ES',{month:'long',year:'numeric'});
+  $('#calendarMonth').textContent=monthLabel.charAt(0).toUpperCase()+monthLabel.slice(1);
+  $('#calendarGrid').innerHTML=Array.from({length:42},(_,i)=>{
+    const day=addDays(start,i),eventCount=DB.events.filter(e=>e.date===day).length,plannedCount=DB.tasks.filter(t=>t.scheduled===day).length,dueCount=DB.tasks.filter(t=>t.due===day).length;
+    const dateLabel=new Date(day+'T12:00:00').toLocaleDateString('es-ES',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+    return `<button class="cal-day ${day.slice(0,7)!==calendarMonth?'outside':''} ${day===todayStr()?'today':''} ${day===calendarSelected?'selected':''}" data-cal-day="${day}" aria-pressed="${day===calendarSelected}" aria-label="${esc(dateLabel)}, ${eventCount} eventos, ${plannedCount} tareas planificadas y ${dueCount} fechas límite"><span class="day-number">${Number(day.slice(-2))}</span><span class="day-dots">${eventCount?'<i class="dot-event"></i>':''}${plannedCount?'<i class="dot-scheduled"></i>':''}${dueCount?'<i class="dot-task"></i>':''}</span></button>`;
+  }).join('');
+  const d=new Date(calendarSelected+'T12:00:00');
+  const selectedLabel=d.toLocaleDateString('es-ES',{weekday:'long',day:'numeric',month:'long'});
+  $('#selectedDateLabel').textContent=selectedLabel.charAt(0).toUpperCase()+selectedLabel.slice(1);
+  const evs=DB.events.filter(e=>e.date===calendarSelected).sort((a,b)=>(a.time||'').localeCompare(b.time||''));
+  const tasks=DB.tasks.filter(t=>t.scheduled===calendarSelected||t.due===calendarSelected).sort((a,b)=>Number(a.done)-Number(b.done)||(a.scheduled||a.due||"").localeCompare(b.scheduled||b.due||""));
+  const eventHTML=evs.map(e=>`<div class="agenda-item"><span class="agenda-mark"></span><div class="agenda-body"><b>${esc(e.title)}</b><p>${e.time?esc(e.time)+' · '+Number(e.duration||60)+' min':'Todo el día'}${e.notes?'\n'+esc(e.notes):''}</p></div><button class="mini-btn" data-event-edit="${esc(e.id)}" aria-label="Editar evento">${appIcon("edit")}</button><button class="mini-btn" data-event-del="${esc(e.id)}" aria-label="Eliminar evento">${appIcon("delete")}</button></div>`).join('');
+  const taskHTMLs=tasks.map(t=>{const details=[];if(t.scheduled===calendarSelected)details.push('Planificada para este día');if(t.due===calendarSelected)details.push('Fecha límite');if(t.done)details.push('Completada');return `<div class="agenda-item"><span class="agenda-mark ${t.due===calendarSelected?'task-mark':''}" style="${t.scheduled===calendarSelected&&t.due!==calendarSelected?'background:#7397c5':''}"></span><div class="agenda-body"><b>${esc(t.title)}</b><p>${details.join(' · ')} · ${esc(t.project||t.category||'Personal')}</p></div><button class="mini-btn" data-cal-task-toggle="${esc(t.id)}" aria-label="${t.done?'Reabrir':'Completar'} tarea">${t.done?'✓':'○'}</button><button class="mini-btn" data-cal-task-edit="${esc(t.id)}" aria-label="Editar tarea">${appIcon("edit")}</button></div>`;}).join('');
+  $('#dayAgenda').innerHTML=eventHTML+taskHTMLs || '<div class="agenda-empty">No hay eventos, tareas planificadas ni fechas límite este día.</div>';
+}
+function shiftCalendarMonth(delta){
+  const [y,m]=calendarMonth.split('-').map(Number); const dt=new Date(y,m-1+delta,1);
+  const year=dt.getFullYear(), month=String(dt.getMonth()+1).padStart(2,'0');
+  calendarMonth=`${year}-${month}`; const last=new Date(year,dt.getMonth()+1,0).getDate();
+  calendarSelected=calendarMonth+'-'+String(Math.min(Number(calendarSelected.slice(-2)),last)).padStart(2,'0'); renderCalendar();
+}
+function openEventModal(event=null){
+  $('#eventModalTitle').textContent=event?'Editar evento':'Nuevo evento';
+  $('#eventId').value=event?.id||''; $('#eventTitle').value=event?.title||''; $('#eventDate').value=event?.date||calendarSelected;
+  $('#eventTime').value=event?.time||''; $('#eventDuration').value=event?.duration||60; $('#eventNotes').value=event?.notes||'';
+  openModal('modalEventOverlay'); focusModalField('modalEventOverlay','eventTitle');
+}
+$('#calendarPrev').addEventListener('click',()=>shiftCalendarMonth(-1));
+$('#calendarNext').addEventListener('click',()=>shiftCalendarMonth(1));
+$('#calendarToday').addEventListener('click',()=>{calendarSelected=todayStr();calendarMonth=calendarSelected.slice(0,7);renderCalendar();});
+$('#newEventBtn').addEventListener('click',()=>openEventModal());
+$('#dayNewEvent').addEventListener('click',()=>openEventModal());
+$('#dayNewTask').addEventListener('click',()=>{openTaskModal();$('#taskScheduled').value=calendarSelected;});
+$('#saveEventBtn').addEventListener('click',()=>{
+  const title=$('#eventTitle').value.trim(),date=$('#eventDate').value,time=$('#eventTime').value;
+  if(!title||!date){toast('Añade un título y una fecha');return;}
+  const duration=Number($('#eventDuration').value);
+  if(time && (!Number.isInteger(duration) || duration<5 || duration>1440)){toast('La duración debe estar entre 5 y 1440 minutos');return;}
+  const id=$('#eventId').value, data={title,date,time,duration:time?duration:60,notes:$('#eventNotes').value.trim()};
+  if(id){ const e=DB.events.find(x=>x.id===id);if(!e)return;Object.assign(e,data); }
+  else DB.events.push({id:uid(),...data,createdAt:Date.now()});
+  calendarSelected=date;calendarMonth=date.slice(0,7);closeModal('modalEventOverlay');saveDB();renderAll();toast(id?'Evento actualizado':'Evento guardado');
+});
+document.addEventListener('click',e=>{
+  const day=e.target.closest('[data-cal-day]');if(day){calendarSelected=day.dataset.calDay;calendarMonth=calendarSelected.slice(0,7);renderCalendar();return;}
+  const edit=e.target.closest('[data-event-edit]');if(edit){const ev=DB.events.find(x=>x.id===edit.dataset.eventEdit);if(ev)openEventModal(ev);return;}
+  const del=e.target.closest('[data-event-del]');if(del){if(confirm('¿Borrar este evento?')){DB.events=DB.events.filter(x=>x.id!==del.dataset.eventDel);saveDB();renderAll();toast('Evento eliminado');}return;}
+  const te=e.target.closest('[data-cal-task-edit]');if(te){const t=DB.tasks.find(x=>x.id===te.dataset.calTaskEdit);if(t)openTaskModal(t);return;}
+  const tt=e.target.closest('[data-cal-task-toggle]');if(tt){const task=DB.tasks.find(x=>x.id===tt.dataset.calTaskToggle);if(!task)return;setTaskDone(task,!task.done);}
+});
+/* Export only calendar events as RFC 5545 .ics, floating local time for timed events. */
+function icsEscape(v){return String(v||'').replace(/\\/g,'\\\\').replace(/\r\n|\r|\n/g,'\\n').replace(/,/g,'\\,').replace(/;/g,'\\;');}
+function icsFold(line){let out='',len=0;for(const ch of line){const n=new TextEncoder().encode(ch).length;if(len+n>75){out+='\r\n ';len=1;}out+=ch;len+=n;}return out;}
+function calendarStamp(d){return d.getFullYear()+String(d.getMonth()+1).padStart(2,'0')+String(d.getDate()).padStart(2,'0')+'T'+String(d.getHours()).padStart(2,'0')+String(d.getMinutes()).padStart(2,'0')+'00';}
+$('#exportCalendarBtn').addEventListener('click',()=>{
+  if(!DB.events.length){toast('No hay eventos para exportar');return;}
+  const now=new Date().toISOString().replace(/[-:]/g,'').replace(/\.\d{3}Z$/,'Z');
+  const lines=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//FLUXO//Calendario//ES','CALSCALE:GREGORIAN'];
+  for(const e of DB.events){
+    lines.push('BEGIN:VEVENT','UID:'+icsEscape(e.id)+'@fluxo-local','DTSTAMP:'+now,'SUMMARY:'+icsEscape(e.title));
+    if(e.time){const start=new Date(e.date+'T'+e.time+':00'),end=new Date(start.getTime()+(e.duration||60)*60000);lines.push('DTSTART:'+calendarStamp(start),'DTEND:'+calendarStamp(end));}
+    else lines.push('DTSTART;VALUE=DATE:'+e.date.replace(/-/g,''),'DTEND;VALUE=DATE:'+addDays(e.date,1).replace(/-/g,''));
+    if(e.notes)lines.push('DESCRIPTION:'+icsEscape(e.notes));lines.push('END:VEVENT');
+  }
+  lines.push('END:VCALENDAR');const blob=new Blob([lines.map(icsFold).join('\r\n')+'\r\n'],{type:'text/calendar;charset=utf-8'});
+  const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='fluxo-eventos.ics';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);toast('Eventos exportados');
+});
+
+
+/* Menú lateral adaptable. */
+const navigationBreakpoint=window.matchMedia ? window.matchMedia("(max-width: 850px)") : {matches:window.innerWidth<=850,addListener(){}};
+const navElement=$("#bottomNav");
+function updateNavigationState(){
+  const mobile=navigationBreakpoint.matches;
+  const open=mobile?document.body.classList.contains("drawer-open"):!document.body.classList.contains("sidebar-collapsed");
+  $("#menuToggle").setAttribute("aria-expanded",String(open));
+  $("#menuToggle").setAttribute("aria-label",open?"Cerrar menú de navegación":"Abrir menú de navegación");
+  if(open){navElement.removeAttribute("aria-hidden");navElement.removeAttribute("inert");}
+  else {navElement.setAttribute("aria-hidden","true");navElement.setAttribute("inert","");}
+}
+function closeNavigation(restoreFocus=true){
+  if(navigationBreakpoint.matches) document.body.classList.remove("drawer-open");
+  else document.body.classList.add("sidebar-collapsed");
+  updateNavigationState();
+  if(restoreFocus) $("#menuToggle").focus();
+}
+$("#menuToggle").addEventListener("click",()=>{
+  if(navigationBreakpoint.matches){document.body.classList.toggle("drawer-open");updateNavigationState();if(document.body.classList.contains("drawer-open"))$("#menuClose").focus();}
+  else {document.body.classList.toggle("sidebar-collapsed");updateNavigationState();}
+});
+$("#menuClose").addEventListener("click",()=>closeNavigation());
+$("#navBackdrop").addEventListener("click",()=>closeNavigation());
+document.addEventListener("keydown",event=>{
+  if(!navigationBreakpoint.matches || !document.body.classList.contains("drawer-open")) return;
+  if(event.key==="Escape"){closeNavigation();return;}
+  if(event.key==="Tab"){
+    const items=[...navElement.querySelectorAll("button:not([disabled])")].filter(b=>b.offsetParent!==null);
+    if(!items.length) return;
+    if(event.shiftKey && document.activeElement===items[0]){event.preventDefault();items[items.length-1].focus();}
+    else if(!event.shiftKey && document.activeElement===items[items.length-1]){event.preventDefault();items[0].focus();}
+  }
+});
+function onNavigationResize(){const inMenu=navElement.contains(document.activeElement);document.body.classList.remove("drawer-open");updateNavigationState();if(inMenu && navElement.hasAttribute("inert")) $("#menuToggle").focus();}
+if(navigationBreakpoint.addEventListener) navigationBreakpoint.addEventListener("change",onNavigationResize); else navigationBreakpoint.addListener(onNavigationResize);
+updateNavigationState();
+
+/* Init */
+loadDB();
+renderAll();
+if ("serviceWorker" in navigator && location.protocol.startsWith("http")) navigator.serviceWorker.register("./sw.js").catch(err=>console.warn("Modo sin conexión no disponible:",err));
+if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(()=>{});
+</script>
+</body>
+</html>

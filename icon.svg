@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <title>FLUXO</title>
+  <rect width="512" height="512" fill="#377a56"/>
+  <g fill="none" stroke="#f6f7f1" stroke-width="28" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M130 154h75c37 0 40 26 69 45l48 47"/>
+    <path d="M130 256h191"/>
+    <path d="M130 358h75c37 0 40-26 69-45l48-47"/>
+    <path d="m304 219 38 37-38 37"/>
+  </g>
+</svg>
