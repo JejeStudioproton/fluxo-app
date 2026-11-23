@@ -729,8 +729,8 @@ function getNexoAIModel(){ try{return (localStorage.getItem(NEXO_AI_MODEL)||"gro
 function updateNexoAIStatus(message){
   const configured=!!getNexoAIKey();
   const s=$("#nexoAIStatus"), ss=$("#nexoAISettingsStatus");
-  if(s){s.textContent=message||(configured?"IA configurada":"IA sin configurar");s.classList.toggle("ready",configured);}
-  if(ss)ss.textContent=message||(configured?"Clave guardada en este dispositivo":"No configurada");
+  if(s){s.textContent=message||(configured?"IA externa configurada":"Organizador local activo");s.classList.toggle("ready",configured||!message);}
+  if(ss)ss.textContent=message||(configured?"Clave guardada en este dispositivo":"IA externa opcional · modo local disponible");
 }
 function buildNexoAIContext(){
   const pending=DB.tasks.filter(t=>!t.done).slice(0,60).map(t=>({
