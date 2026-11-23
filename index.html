@@ -774,10 +774,65 @@ async function callNexoAI(instructions,input){
 function showNexoAIOutput(text){
   const out=$("#nexoAIOutput");if(out)out.textContent=text;
 }
+function localNexoCoach(ask){
+  const today=todayStr(), pending=DB.tasks.filter(t=>!t.done);
+  const overdue=pending.filter(t=>t.due&&t.due<today);
+  const dueToday=pending.filter(t=>t.due===today);
+  const dueSoon=pending.filter(t=>t.due>today&&t.due<=addDays(today,3));
+  const unscheduled=pending.filter(t=>!t.scheduled);
+  const available=Math.max(0,Number(getTodayCheckin().timeAvailable||4)*60);
+  const events=DB.events.filter(e=>e.date===today);
+  const eventMin=events.reduce((n,e)=>n+Number(e.duration||60),0);
+  const fixed=pending.filter(t=>t.scheduled===today).reduce((n,t)=>n+Number(t.duration||30),0);
+  const capacity=Math.max(0,Math.floor(available*.8-eventMin-fixed));
+  const relevant=sortedTasks(pending.filter(t=>taskAvailableOnDay(t,today)));
+  const selected=relevant.slice(0,3);
+  const totalToday=relevant.reduce((n,t)=>n+Number(t.duration||30),0);
+  const lines=[];
+  lines.push("TU PLAN DE ACCIÓN");
+  if(!pending.length){lines.push("No tienes tareas pendientes. Añade las tareas reales que tengas y te ayudaré a distribuirlas.");return lines.join("\n");}
+  if(overdue.length)lines.push("1. PRIMERO: revisa "+overdue.length+" tarea(s) con fecha vencida: "+overdue.slice(0,3).map(t=>t.title).join(", ")+". Decide si hay que terminarlas hoy o renegociar la fecha; no las ignores.");
+  else if(dueToday.length)lines.push("1. PRIORIDAD: hoy vencen "+dueToday.length+" tarea(s): "+dueToday.slice(0,3).map(t=>t.title).join(", ")+".");
+  else if(dueSoon.length)lines.push("1. ANTICÍPATE: pronto vencen "+dueSoon.length+" tarea(s): "+dueSoon.slice(0,3).map(t=>t.title).join(", ")+".");
+  else lines.push("1. PRIORIDAD: no hay fechas límite inmediatas detectadas. Empieza por la tarea de mayor prioridad y mayor impacto.");
+  if(selected.length){
+    lines.push("2. QUÉ HACER AHORA:");
+    selected.forEach((t,i)=>lines.push("   "+(i+1)+") "+t.title+" — "+(t.duration||30)+" min; prioridad "+(t.priority||"media")+(t.due?" · límite "+fmtDate(t.due):" · sin fecha límite")+"."));
+  }
+  lines.push("3. CAPACIDAD REALISTA: tienes aproximadamente "+Math.round(capacity)+" min disponibles para tareas hoy después de reservar margen y descontar compromisos registrados. Las tareas accesibles hoy suman "+totalToday+" min.");
+  if(totalToday>capacity)lines.push("   Hay sobrecarga estimada de "+(totalToday-capacity)+" min. No intentes hacerlo todo: conserva lo urgente/importante y mueve o divide el resto.");
+  else if(capacity-totalToday>=45)lines.push("   Queda margen estimado de "+(capacity-totalToday)+" min. Úsalo para pausas e imprevistos, no lo llenes automáticamente.");
+  if(unscheduled.length)lines.push("4. ORGANIZACIÓN: "+unscheduled.length+" tarea(s) aún no tienen fecha de planificación. Pulsa «Planificar mi semana» para distribuirlas.");
+  if(events.length)lines.push("5. COMPROMISOS: hoy tienes "+events.length+" evento(s) registrados. Comprueba que los eventos sin hora no coincidan con las tareas propuestas.");
+  const q=String(ask||"").toLowerCase();
+  if(/no me da tiempo|demasiad|agobi|sobrecarg|todo/.test(q))lines.push("REGLA PARA DESBLOQUEARTE: elige una tarea imprescindible, reduce su siguiente paso a 10–15 min y pospón conscientemente una tarea menos importante.");
+  else if(/empez|primero|ahora|prior/.test(q))lines.push("MI RECOMENDACIÓN: empieza por la primera tarea de la lista durante 15 minutos. Después reevalúa; no cambies de tarea solo porque aparezca algo nuevo.");
+  else if(/mañana|semana|planific|organiza/.test(q))lines.push("Para repartir la carga entre días, usa «Planificar mi semana»; esta planificación local no necesita una clave de API.");
+  lines.push("Nota: este análisis se calcula en tu dispositivo con tus tareas y compromisos guardados; no es una respuesta de un modelo externo.");
+  return lines.join("\n");
+}
 async function runNexoAI(mode){
   const ask=$("#nexoAIPrompt")?.value.trim()||"Ayúdame a decidir qué hacer primero y cómo distribuir mi tiempo hoy.";
   const out=$("#nexoAIOutput"),askBtn=$("#nexoAIAskBtn"),planBtn=$("#nexoAIPlanBtn");
-  if(!getNexoAIKey()){showNexoAIOutput("Configura tu clave API de xAI en Ajustes. No la envíes por este chat.");switchView("ajustes");return;}
+  if(!getNexoAIKey()){
+    window._nexoPendingAIPlan=null;
+    if($("#nexoAIApplyBtn"))$("#nexoAIApplyBtn").hidden=true;
+    if(mode==="plan"){
+      const before=new Set(DB.tasks.filter(t=>!t.done).map(t=>String(t.id)+":"+String(t.scheduled||"")));
+      const result=autoPlanWeek();
+      const assigned=DB.tasks.filter(t=>!t.done&&t.autoScheduled&&t.scheduled>=todayStr()&&t.scheduled<=addDays(todayStr(),6));
+      const warnings=[];
+      const overloaded=assigned.filter(t=>{const day=t.scheduled;const tasks=DB.tasks.filter(x=>!x.done&&x.scheduled===day);const ev=DB.events.filter(e=>e.date===day).reduce((n,e)=>n+Number(e.duration||60),0);const base=day===todayStr()?Number(getTodayCheckin().timeAvailable||4)*60:240;return tasks.reduce((n,x)=>n+Number(x.duration||30),0)+ev>base*.8;});
+      if(result.overflow)warnings.push(result.overflow+" tarea(s) quedaron en días con carga estimada excesiva; revísalas.");
+      if(assigned.length===0)warnings.push("No se cambiaron fechas: puede que las tareas ya estén planificadas o que tengan fechas futuras fijadas.");
+      showNexoAIOutput("PLAN SEMANAL CREADO SIN API\n\nHe distribuido "+result.assigned+" tarea(s) entre los próximos 7 días usando fechas límite, prioridad, duración, eventos registrados y capacidad estimada."+ (warnings.length?"\n\nA revisar:\n• "+warnings.join("\n• "):"") +"\n\nRevisa la vista «Plan del día» y el calendario. La planificación puede necesitar ajustes si faltan compromisos o duraciones.");
+      updateNexoAIStatus("Organizador local activo");
+    }else{
+      showNexoAIOutput(localNexoCoach(ask));
+      updateNexoAIStatus("Organizador local activo");
+    }
+    return;
+  }
   if(askBtn)askBtn.disabled=true;if(planBtn)planBtn.disabled=true;
   if(out)out.textContent="Analizando tus tareas y compromisos…";
   updateNexoAIStatus("Conectando con Grok…");
