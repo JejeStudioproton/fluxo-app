@@ -784,7 +784,7 @@ function localNexoCoach(ask){
   const events=DB.events.filter(e=>e.date===today);
   const eventMin=events.reduce((n,e)=>n+Number(e.duration||60),0);
   const fixed=pending.filter(t=>t.scheduled===today).reduce((n,t)=>n+Number(t.duration||30),0);
-  const capacity=Math.max(0,Math.floor(available*.8-eventMin-fixed));
+  const capacity=Math.max(0,Math.floor(available*.8-eventMin));
   const relevant=sortedTasks(pending.filter(t=>taskAvailableOnDay(t,today)));
   const selected=relevant.slice(0,3);
   const totalToday=relevant.reduce((n,t)=>n+Number(t.duration||30),0);
@@ -818,7 +818,6 @@ async function runNexoAI(mode){
     window._nexoPendingAIPlan=null;
     if($("#nexoAIApplyBtn"))$("#nexoAIApplyBtn").hidden=true;
     if(mode==="plan"){
-      const before=new Set(DB.tasks.filter(t=>!t.done).map(t=>String(t.id)+":"+String(t.scheduled||"")));
       const result=autoPlanWeek();
       const assigned=DB.tasks.filter(t=>!t.done&&t.autoScheduled&&t.scheduled>=todayStr()&&t.scheduled<=addDays(todayStr(),6));
       const warnings=[];
